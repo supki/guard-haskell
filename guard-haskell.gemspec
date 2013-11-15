@@ -5,7 +5,7 @@ require 'guard/haskell/version'
 
 Gem::Specification.new do |s|
   s.name = 'guard-haskell'
-  s.version = Guard::Haskell::VERSION
+  s.version = Guard::HaskellVersion::VERSION
   s.author = 'Matvey Aksenov'
   s.email = 'matvey.aksenov@gmail.com'
   s.summary = 'Guard gem for Haskell'

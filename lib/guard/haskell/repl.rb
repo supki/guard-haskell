@@ -1,4 +1,4 @@
-module ::Guard::Haskell::Repl
+class ::Guard::Haskell::Repl
   attr_reader :io
 
   def initialize includes, dot_ghci
