@@ -1,10 +1,10 @@
 class ::Guard::Haskell::Repl
   attr_reader :io
 
-  def initialize includes, dot_ghci
-    sandbox = ::Dir[".cabal-sandbox/*packages.conf.d"].first
+  def initialize dot_ghci
     cmd = ["ghci"]
-    includes.each { |x| cmd << "-i#{x}" }
+    Dir["*"].each { |x| cmd << "-i#{x}" }
+    sandbox = ::Dir[".cabal-sandbox/*packages.conf.d"].first
     cmd << "-package-db=#{sandbox}" if sandbox
     case dot_ghci
     when :ignore then cmd << "-ignore-dot-ghci"
