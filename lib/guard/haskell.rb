@@ -78,10 +78,7 @@ module ::Guard
           @last_run_was_successful = false
           Notifier.notify('Failure', image: :failed)
         end
-      when /#{tests}\/(.+)Spec.l?hs$/
-        repl.reload
-        run $1.gsub(/\//, ".")
-      when /#{sources}\/(.+).l?hs$/
+      when /#{tests}\/(.+)Spec.l?hs$/, /#{sources}\/(.+).l?hs$/
         repl.reload
         run $1.gsub(/\//, ".")
       end
