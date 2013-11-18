@@ -31,14 +31,6 @@ end
 
 # Options
 
-## `sources`
-
-Sources locations (default: `"src"`)
-
-## `tests`
-
-Tests locations, (default: `"test"`)
-
 ## `all_on_start`
 
 Run all specs on start, (default: `false`)
@@ -50,3 +42,7 @@ Run all specs after previously failing spec passes, (default: `false`)
 ## `dot_ghci`
 
 Path to `.ghci` script to load, can also be `:ignore` to ignore system-wide `.ghci` script (default: `nil`)
+
+## `root_spec`
+
+Root spec location, (default: `test/Spec.hs`)
