@@ -50,6 +50,7 @@ module ::Guard
 
     def run_all
       repl.run
+      result
     end
 
     def run pattern
@@ -58,6 +59,7 @@ module ::Guard
       else
         repl.rerun
       end
+      result
     end
 
     def run_on_additions paths
@@ -67,27 +69,24 @@ module ::Guard
       end
     end
 
+    def result
+      if repl.success?
+        if not @last_run_was_successful
+          @last_run_was_successful = true
+          run_all if @all_on_pass
+        end
+        Notifier.notify('Success')
+      else
+        @last_run_was_successful = false
+        Notifier.notify('Failure', image: :failed)
+      end
+    end
+
     def run_on_modifications paths
-      pattern = paths.first
-      case pattern
+      case paths.first
       when /.cabal$/, %r{#{root_spec}$}
         repl.reload
         run_all
-      when ".hspec-results"
-        out = File.read pattern
-
-        puts out
-
-        if out =~ /\d+ examples?, 0 failures/
-          if not @last_run_was_successful
-            @last_run_was_successful = true
-            run_all if @all_on_pass
-          end
-          Notifier.notify('Success')
-        else
-          @last_run_was_successful = false
-          Notifier.notify('Failure', image: :failed)
-        end
       when /(.+)Spec.l?hs$/, /(.+).l?hs$/
         repl.reload
         run $1.strip_lowercase_directories.gsub(/\//, ".")

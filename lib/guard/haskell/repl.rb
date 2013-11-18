@@ -1,5 +1,8 @@
+require 'io/wait'
+require 'open3'
+
 class ::Guard::Haskell::Repl
-  attr_reader :io
+  attr_reader :stdin, :reader, :thread, :success
 
   def initialize dot_ghci
     cmd = ["ghci"]
@@ -11,18 +14,38 @@ class ::Guard::Haskell::Repl
     when /.+/    then cmd << "-ghci-script #{dot_ghci}"
     end
 
-    @io = ::IO.popen cmd, mode: "r+"
+    @stdin, stdout, @thread = ::Open3.popen2e(*cmd)
+    @reader = ::Thread.new do
+      loop do
+        n = stdout.nread
+        if n > 0
+          out = stdout.read(n)
+          print out
+          case out
+          when /\d+ examples?, 0 failures/
+            @success = true
+            @running = false
+          when /\d+ examples?, \d+ failures?/, /Failed, modules loaded:/, /\*{3} Exception:/
+            @success = false
+            @running = false
+          end
+        else
+          sleep(0.1)
+        end
+      end
+    end
   end
 
   def exit
-    ::Process::kill "TERM", io.pid
+    ::Process::kill "TERM", thread.pid
+    ::Thread.kill(reader)
   end
 
   def run pattern = nil
     if pattern.nil?
-      repl ":main --color --out .hspec-results"
+      repl ":main --color"
     else
-      repl ":main --color --match #{pattern} --out .hspec-results"
+      repl ":main --color --match #{pattern}"
     end
   end
 
@@ -31,22 +54,20 @@ class ::Guard::Haskell::Repl
   end
 
   def rerun
-    repl ":main --color --rerun --out .hspec-results"
+    repl ":main --color --rerun"
   end
 
   def reload
     repl ":reload"
   end
 
+  def success?
+    while @running do sleep(0.01) end
+    @success
+  end
+
   def repl command
-    io.write "#{command}\n"
-    result = ""
-    begin
-      loop do
-        result << io.read_nonblock(4096)
-      end
-    rescue ::IO::WaitReadable
-      result
-    end
+    @running = true
+    stdin.write "#{command}\n"
   end
 end
