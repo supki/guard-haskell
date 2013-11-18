@@ -38,7 +38,11 @@ module ::Guard
       start
     end
 
-    def run_all pattern = nil
+    def run_all
+      repl.run
+    end
+
+    def run pattern
       if @last_run_was_successful
         repl.run pattern
       else
@@ -76,10 +80,10 @@ module ::Guard
         end
       when /#{tests}\/(.+)Spec.l?hs$/
         repl.reload
-        run_all $1.gsub(/\//, ".")
+        run $1.gsub(/\//, ".")
       when /#{sources}\/(.+).l?hs$/
         repl.reload
-        run_all $1.gsub(/\//, ".")
+        run $1.gsub(/\//, ".")
       end
     end
   end

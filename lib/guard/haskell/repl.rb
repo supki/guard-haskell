@@ -18,7 +18,7 @@ class ::Guard::Haskell::Repl
     ::Process::kill "TERM", io.pid
   end
 
-  def run pattern
+  def run pattern = nil
     if pattern.nil?
       repl ":main --color --out .hspec-results"
     else
