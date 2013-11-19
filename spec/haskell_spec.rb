@@ -41,8 +41,8 @@ describe ::Guard::Haskell do
 
   before :each do
     ::Guard.stub(:add_group)
-      ::Guard::Haskell::Repl.any_instance.stub(:start)
-      ::Guard::Haskell::Repl.any_instance.stub(:init)
+    ::Guard::Haskell::Repl.any_instance.stub(:start)
+    ::Guard::Haskell::Repl.any_instance.stub(:init)
   end
 
   describe ".initialize" do
@@ -81,7 +81,7 @@ describe ::Guard::Haskell do
       guard.start
     end
 
-    it "does runs all specs on start with option enabled" do
+    it "runs all specs on start with :all_on_start option enabled" do
       custom_guard = ::Guard::Haskell.new(all_on_start: true)
 
       expect(custom_guard).to receive(:run_all)
@@ -90,7 +90,7 @@ describe ::Guard::Haskell do
       custom_guard.start
     end
 
-    it "starts repl with custom speec with option enabled" do
+    it "starts repl with custom spec specified with :top_spec option" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:init).with("test/CustomSpec.hs")
 
       custom_guard = ::Guard::Haskell.new(top_spec: "test/CustomSpec.hs")
@@ -156,7 +156,7 @@ describe ::Guard::Haskell do
       expect(guard.instance_variable_get(:@last_run_was_successful)).to be_false
     end
 
-    it "does not run all spec on success after failure by default" do
+    it "does not run all specs on success after failure by default" do
       ::Guard::Haskell::Repl.any_instance.stub(:success?) { true }
       guard.instance_variable_set(:@last_run_was_successful, false)
 
@@ -166,7 +166,7 @@ describe ::Guard::Haskell do
       guard.result
     end
 
-    it "does run all spec on success after failure with option" do
+    it "runs all specs on success after failure with :all_on_pass option" do
       ::Guard::Haskell::Repl.any_instance.stub(:success?) { true }
       custom_guard = ::Guard::Haskell.new(all_on_pass: true)
       custom_guard.instance_variable_set(:@last_run_was_successful, false)
@@ -229,7 +229,7 @@ describe ::Guard::Haskell do
       guard.run_on_modifications(["FooSpec.hs"])
     end
 
-    it "run specs for simple literate haskell files" do
+    it "run specs for simple literate haskell spec files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
 
@@ -237,7 +237,7 @@ describe ::Guard::Haskell do
       guard.run_on_modifications(["FooSpec.lhs"])
     end
 
-    it "run specs for *complex* haskell files" do
+    it "run specs for *complex* haskell spec files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Bar.Baz")
 
