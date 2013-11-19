@@ -42,6 +42,10 @@ Run root spec after previously failing spec passes (default: `false`).
 Path to custom `.ghci` script to load, can also be `:ignore`
 to ignore system-wide `.ghci` script (default: `nil`).
 
+## `ghci_options`
+
+Pass custom ghci options, for example, `-XCPP` directives like `-DTEST` (default: `[]`).
+
 ## `root_spec`
 
 Root spec location (default: `test/Spec.hs`).
