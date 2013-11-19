@@ -18,7 +18,7 @@ module ::Guard
 
     require 'guard/haskell/repl'
 
-    attr_reader :repl, :root_spec, :dot_ghci, :targets
+    attr_reader :repl, :root_spec, :dot_ghci, :ghci_options, :targets
 
     def initialize options = {}
       super
@@ -26,12 +26,13 @@ module ::Guard
 
       @root_spec    = options[:root_spec] || "test/Spec.hs"
       @dot_ghci     = options[:dot_ghci]
+      @ghci_options = options[:ghci_options] || []
       @all_on_start = options[:all_on_start] || false
       @all_on_pass  = options[:all_on_pass] || false
     end
 
     def start
-      @repl = Repl.new dot_ghci
+      @repl = Repl.new(dot_ghci, ghci_options)
       repl.init root_spec
 
       @targets = Set.new Dir.glob("**/*.{hs,lhs}")
