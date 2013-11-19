@@ -11,6 +11,10 @@ class String
       self
     end
   end
+
+  def path_to_module_name
+    self.gsub(/\//, ".")
+  end
 end
 
 module ::Guard
@@ -38,6 +42,7 @@ module ::Guard
       @targets = Set.new Dir.glob("**/*.{hs,lhs}")
 
       run_all if @all_on_start
+      result
     end
 
     def stop
@@ -51,7 +56,6 @@ module ::Guard
 
     def run_all
       repl.run
-      result
     end
 
     def run pattern
@@ -60,7 +64,6 @@ module ::Guard
       else
         repl.rerun
       end
-      result
     end
 
     def run_on_additions paths
@@ -75,6 +78,7 @@ module ::Guard
         if not @last_run_was_successful
           @last_run_was_successful = true
           run_all if @all_on_pass
+          result
         end
         Notifier.notify('Success')
       else
@@ -88,9 +92,11 @@ module ::Guard
       when /.cabal$/, %r{#{top_spec}$}
         repl.reload
         run_all
+        result
       when /(.+)Spec.l?hs$/, /(.+).l?hs$/
         repl.reload
-        run $1.strip_lowercase_directories.gsub(/\//, ".")
+        run $1.strip_lowercase_directories.path_to_module_name
+        result
       end
     end
   end
