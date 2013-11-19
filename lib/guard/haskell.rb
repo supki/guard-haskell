@@ -18,13 +18,13 @@ module ::Guard
 
     require 'guard/haskell/repl'
 
-    attr_reader :repl, :root_spec, :dot_ghci, :ghci_options, :targets
+    attr_reader :repl, :top_spec, :dot_ghci, :ghci_options, :targets
 
     def initialize options = {}
       super
       @last_run_was_successful = true # try to prove it wasn't :-)
 
-      @root_spec    = options[:root_spec] || "test/Spec.hs"
+      @top_spec    = options[:top_spec] || "test/Spec.hs"
       @dot_ghci     = options[:dot_ghci]
       @ghci_options = options[:ghci_options] || []
       @all_on_start = options[:all_on_start] || false
@@ -33,7 +33,7 @@ module ::Guard
 
     def start
       @repl = Repl.new(dot_ghci, ghci_options)
-      repl.init root_spec
+      repl.init top_spec
 
       @targets = Set.new Dir.glob("**/*.{hs,lhs}")
 
@@ -66,7 +66,7 @@ module ::Guard
     def run_on_additions paths
       unless paths.all? { |path| targets.include? path }
         @targets += paths
-        repl.init root_spec
+        repl.init top_spec
       end
     end
 
@@ -85,7 +85,7 @@ module ::Guard
 
     def run_on_modifications paths
       case paths.first
-      when /.cabal$/, %r{#{root_spec}$}
+      when /.cabal$/, %r{#{top_spec}$}
         repl.reload
         run_all
       when /(.+)Spec.l?hs$/, /(.+).l?hs$/
