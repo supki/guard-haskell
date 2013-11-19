@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.email = 'matvey.aksenov@gmail.com'
   s.summary = 'Guard gem for Haskell'
   s.description = 'Guard::Haskell automatically runs your specs'
+  s.homepage = 'https://github.com/supki/guard-haskell#readme'
   s.license = 'BSD3'
 
   s.files = `git ls-files`.split($/)

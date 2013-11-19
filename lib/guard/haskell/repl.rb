@@ -4,7 +4,7 @@ require 'open3'
 class ::Guard::Haskell::Repl
   attr_reader :stdin, :reader, :thread, :success
 
-  def initialize dot_ghci, ghci_options
+  def start dot_ghci, ghci_options
     cmd = ["ghci"]
     Dir["*"].each { |x| cmd << "-i#{x}" }
     sandbox = ::Dir[".cabal-sandbox/*packages.conf.d"].first
@@ -37,6 +37,10 @@ class ::Guard::Haskell::Repl
     end
   end
 
+  def init spec
+    repl ":load #{spec}"
+  end
+
   def exit
     ::Process::kill "TERM", thread.pid
     ::Thread.kill(reader)
@@ -48,10 +52,6 @@ class ::Guard::Haskell::Repl
     else
       repl ":main --color --match #{pattern}"
     end
-  end
-
-  def init spec
-    repl ":load #{spec}"
   end
 
   def rerun

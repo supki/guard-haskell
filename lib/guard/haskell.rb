@@ -2,7 +2,7 @@ require 'bundler/setup'
 require 'guard/plugin'
 require 'set'
 
-class String
+class ::String
   def strip_lowercase_directories
     matches = self.match(/^\p{Lower}[^\/]+\/(.+)/)
     if matches
@@ -28,7 +28,7 @@ module ::Guard
       super
       @last_run_was_successful = true # try to prove it wasn't :-)
 
-      @top_spec    = options[:top_spec] || "test/Spec.hs"
+      @top_spec     = options[:top_spec] || "test/Spec.hs"
       @dot_ghci     = options[:dot_ghci]
       @ghci_options = options[:ghci_options] || []
       @all_on_start = options[:all_on_start] || false
@@ -36,13 +36,16 @@ module ::Guard
     end
 
     def start
-      @repl = Repl.new(dot_ghci, ghci_options)
-      repl.init top_spec
+      @repl = Repl.new
+      repl.start(dot_ghci, ghci_options)
+      repl.init(top_spec)
 
-      @targets = Set.new Dir.glob("**/*.{hs,lhs}")
+      @targets = ::Set.new(::Dir.glob("**/*.{hs,lhs}"))
 
-      run_all if @all_on_start
-      result
+      if @all_on_start
+        run_all
+        result
+      end
     end
 
     def stop
@@ -60,16 +63,9 @@ module ::Guard
 
     def run pattern
       if @last_run_was_successful
-        repl.run pattern
+        repl.run(pattern)
       else
         repl.rerun
-      end
-    end
-
-    def run_on_additions paths
-      unless paths.all? { |path| targets.include? path }
-        @targets += paths
-        repl.init top_spec
       end
     end
 
@@ -77,8 +73,10 @@ module ::Guard
       if repl.success?
         if not @last_run_was_successful
           @last_run_was_successful = true
-          run_all if @all_on_pass
-          result
+          if @all_on_pass
+            run_all
+            result
+          end
         end
         Notifier.notify('Success')
       else
@@ -87,15 +85,18 @@ module ::Guard
       end
     end
 
+    def run_on_additions paths
+      unless paths.all? { |path| targets.include? path }
+        @targets += paths
+        repl.init(top_spec)
+      end
+    end
+
     def run_on_modifications paths
       case paths.first
-      when /.cabal$/, %r{#{top_spec}$}
+      when /(.+)Spec\.l?hs$/, /(.+)\.l?hs$/
         repl.reload
-        run_all
-        result
-      when /(.+)Spec.l?hs$/, /(.+).l?hs$/
-        repl.reload
-        run $1.strip_lowercase_directories.path_to_module_name
+        run($1.strip_lowercase_directories.path_to_module_name)
         result
       end
     end
