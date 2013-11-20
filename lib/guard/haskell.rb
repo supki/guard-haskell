@@ -23,26 +23,26 @@ module ::Guard
     require 'guard/haskell/repl'
 
     attr_reader :repl, :top_spec, :dot_ghci, :ghci_options, :targets
+    attr_reader :all_on_start, :all_on_pass
 
     def initialize options = {}
       super
-      @last_run_was_successful = true # try to prove it wasn't :-)
-
+      @last_run     = :success # try to prove it wasn't :-)
       @top_spec     = options[:top_spec] || "test/Spec.hs"
       @dot_ghci     = options[:dot_ghci]
       @ghci_options = options[:ghci_options] || []
       @all_on_start = options[:all_on_start] || false
       @all_on_pass  = options[:all_on_pass] || false
+      @repl         = Repl.new
     end
 
     def start
-      @repl = Repl.new
       repl.start(dot_ghci, ghci_options)
       repl.init(top_spec)
 
       @targets = ::Set.new(::Dir.glob("**/*.{hs,lhs}"))
 
-      if @all_on_start
+      if all_on_start
         run_all
         result
       end
@@ -62,7 +62,7 @@ module ::Guard
     end
 
     def run pattern
-      if @last_run_was_successful
+      if @last_run == :success
         repl.run(pattern)
       else
         repl.rerun
@@ -71,16 +71,16 @@ module ::Guard
 
     def result
       if repl.success?
-        if not @last_run_was_successful
-          @last_run_was_successful = true
-          if @all_on_pass
+        if @last_run == :failure
+          @last_run = :success
+          if all_on_pass
             run_all
             result
           end
         end
         Notifier.notify('Success')
       else
-        @last_run_was_successful = false
+        @last_run = :failure
         Notifier.notify('Failure', image: :failed)
       end
     end
