@@ -1,3 +1,9 @@
+PATH
+  remote: .
+  specs:
+    guard-haskell (0.1.0.0)
+      guard (>= 2.1.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -43,6 +49,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  guard
-  rake
-  rspec
+  bundler (>= 1.3.5)
+  guard-haskell!
+  rake (>= 1.3.5)
+  rspec (>= 1.3.5)
