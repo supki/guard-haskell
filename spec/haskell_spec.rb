@@ -1,6 +1,5 @@
-require 'rspec'
+require 'spec_helper'
 require 'guard/notifier'
-require 'guard/haskell'
 
 describe "monkey patching" do
   describe ::String do
@@ -196,6 +195,7 @@ describe ::Guard::Haskell do
     it "run specs for simple haskell files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
 
       guard.start
       guard.run_on_modifications(["Foo.hs"])
@@ -204,6 +204,7 @@ describe ::Guard::Haskell do
     it "run specs for simple literate haskell files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
 
       guard.start
       guard.run_on_modifications(["Foo.lhs"])
@@ -212,6 +213,7 @@ describe ::Guard::Haskell do
     it "run specs for *complex* haskell files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Bar.Baz")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
 
       guard.start
       guard.run_on_modifications(["foo/Bar/Baz.hs"])
@@ -220,6 +222,7 @@ describe ::Guard::Haskell do
     it "run specs for simple haskell spec files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
 
       guard.start
       guard.run_on_modifications(["FooSpec.hs"])
@@ -228,6 +231,7 @@ describe ::Guard::Haskell do
     it "run specs for simple literate haskell spec files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
 
       guard.start
       guard.run_on_modifications(["FooSpec.lhs"])
@@ -236,6 +240,7 @@ describe ::Guard::Haskell do
     it "run specs for *complex* haskell spec files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Bar.Baz")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
 
       guard.start
       guard.run_on_modifications(["foo/Bar/BazSpec.hs"])
