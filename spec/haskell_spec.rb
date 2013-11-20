@@ -58,10 +58,6 @@ describe ::Guard::Haskell do
       expect(guard.instance_variable_defined?(:@ghci_options)).to be_true
     end
 
-    it "has :dot_ghci option" do
-      expect(guard.instance_variable_defined?(:@dot_ghci)).to be_true
-    end
-
     it "has :top_spec option" do
       expect(guard.instance_variable_defined?(:@top_spec)).to be_true
     end

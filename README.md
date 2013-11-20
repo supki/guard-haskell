@@ -46,7 +46,7 @@ end
 Customized haskell project:
 
 ```ruby
-guard :haskell, all_on_pass: true, dot_ghci: :ignore, ghci_options: ["-DTEST"] do
+guard :haskell, all_on_pass: true, ghci_options: ["-DTEST"] do
   watch(%r{.*\.cabal$})
   watch(%r{test/.+Spec.l?hs$})
   watch(%r{lib/.+.l?hs$})
@@ -65,11 +65,6 @@ Run all specs on start (default: `false`).
 ### `all_on_pass`
 
 Run all specs after previously failing spec _finally_ passes (default: `false`).
-
-### `dot_ghci`
-
-Path to custom `.ghci` script to load, can also be `:ignore`
-to ignore all `.ghci` scripts (default: `nil`).
 
 ### `ghci_options`
 

@@ -4,15 +4,11 @@ require 'open3'
 class ::Guard::Haskell::Repl
   attr_reader :stdin, :reader, :thread, :success
 
-  def start dot_ghci, ghci_options
+  def start ghci_options
     cmd = ["ghci"]
     Dir["*"].each { |x| cmd << "-i#{x}" }
     sandbox = ::Dir[".cabal-sandbox/*packages.conf.d"].first
     cmd << "-package-db=#{sandbox}" if sandbox
-    case dot_ghci
-    when :ignore then cmd << "-ignore-dot-ghci"
-    when /.+/    then cmd << "-ghci-script #{dot_ghci}"
-    end
     cmd.concat(ghci_options)
 
     @stdin, stdout, @thread = ::Open3.popen2e(*cmd)
