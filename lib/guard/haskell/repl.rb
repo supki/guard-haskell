@@ -18,16 +18,18 @@ class ::Guard::Haskell::Repl
         if n > 0
           out = stdout.read(n)
           print out
-          case out
-          when /\d+ examples?, 0 failures/
-            @success = true
-            @running = false
-          when /\d+ examples?, \d+ failures?/,
-               /Failed, modules loaded:/,
-               /\*{3} Exception:/,
-               /phase `C preprocessor' failed/
-            @success = false
-            @running = false
+          if @running
+            case out
+            when /\d+ examples?, 0 failures/
+              @success = true
+              @running = false
+            when /\d+ examples?, \d+ failures?/,
+                 /Failed, modules loaded:/,
+                 /\*{3} Exception:/,
+                 /phase `C preprocessor' failed/
+              @success = false
+              @running = false
+            end
           end
         else
           sleep(0.1)
@@ -47,18 +49,14 @@ class ::Guard::Haskell::Repl
 
   def run pattern = nil
     if pattern.nil?
-      repl ":main --color"
+      repl ":reload\n:main --color"
     else
-      repl ":main --color --match #{pattern}"
+      repl ":reload\n:main --color --match #{pattern}"
     end
   end
 
   def rerun
-    repl ":main --color --rerun"
-  end
-
-  def reload
-    repl ":reload"
+    repl ":reload\n:main --color --rerun"
   end
 
   def success?

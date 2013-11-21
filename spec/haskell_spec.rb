@@ -71,7 +71,7 @@ describe ::Guard::Haskell do
 
     it "does not run all specs on start by default" do
       expect(guard).not_to receive(:run_all)
-      expect(guard).not_to receive(:result)
+      expect(guard).not_to receive(:success?)
 
       guard.start
     end
@@ -80,7 +80,7 @@ describe ::Guard::Haskell do
       custom_guard = ::Guard::Haskell.new(all_on_start: true)
 
       expect(custom_guard).to receive(:run_all)
-      expect(custom_guard).to receive(:result)
+      expect(custom_guard).to receive(:success?)
 
       custom_guard.start
     end
@@ -136,7 +136,7 @@ describe ::Guard::Haskell do
       guard.instance_variable_set(:@last_run, :failure)
 
       guard.start
-      guard.result
+      guard.success?
       expect(guard.instance_variable_get(:@last_run)).to eq(:success)
     end
 
@@ -147,7 +147,7 @@ describe ::Guard::Haskell do
       guard.instance_variable_set(:@last_run, :success)
 
       guard.start
-      guard.result
+      guard.success?
       expect(guard.instance_variable_get(:@last_run)).to eq(:failure)
     end
 
@@ -158,7 +158,7 @@ describe ::Guard::Haskell do
       expect(guard).not_to receive(:run_all)
 
       guard.start
-      guard.result
+      guard.success?
     end
 
     it "runs all specs on success after failure with :all_on_pass option" do
@@ -169,7 +169,7 @@ describe ::Guard::Haskell do
       expect(custom_guard).to receive(:run_all)
 
       custom_guard.start
-      custom_guard.result
+      custom_guard.success?
     end
   end
 
@@ -193,7 +193,6 @@ describe ::Guard::Haskell do
 
   describe "#run_on_modifications" do
     it "run specs for simple haskell files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
 
@@ -202,7 +201,6 @@ describe ::Guard::Haskell do
     end
 
     it "run specs for simple literate haskell files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
 
@@ -211,7 +209,6 @@ describe ::Guard::Haskell do
     end
 
     it "run specs for *complex* haskell files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Bar.Baz")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
 
@@ -220,7 +217,6 @@ describe ::Guard::Haskell do
     end
 
     it "run specs for simple haskell spec files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
 
@@ -229,7 +225,6 @@ describe ::Guard::Haskell do
     end
 
     it "run specs for simple literate haskell spec files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
 
@@ -238,7 +233,6 @@ describe ::Guard::Haskell do
     end
 
     it "run specs for *complex* haskell spec files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Bar.Baz")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
 
