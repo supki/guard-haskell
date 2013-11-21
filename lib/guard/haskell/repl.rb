@@ -39,7 +39,7 @@ class ::Guard::Haskell::Repl
   end
 
   def init spec
-    repl ":load #{spec}"
+    _repl ":load #{spec}\n"
   end
 
   def exit
@@ -49,14 +49,14 @@ class ::Guard::Haskell::Repl
 
   def run pattern = nil
     if pattern.nil?
-      repl ":reload\n:main --color"
+      _repl ":reload\n:main --color\n"
     else
-      repl ":reload\n:main --color --match #{pattern}"
+      _repl ":reload\n:main --color --match #{pattern}\n"
     end
   end
 
   def rerun
-    repl ":reload\n:main --color --rerun"
+    _repl ":reload\n:main --color --rerun\n"
   end
 
   def success?
@@ -64,8 +64,8 @@ class ::Guard::Haskell::Repl
     @success
   end
 
-  def repl command
+  def _repl command
     @running = true
-    stdin.write "#{command}\n"
+    stdin.write command
   end
 end
