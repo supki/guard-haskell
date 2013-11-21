@@ -1,6 +1,8 @@
 guard-haskell
 =============
 [![Build Status](https://secure.travis-ci.org/supki/guard-haskell.png?branch=master)](http://travis-ci.org/supki/guard-haskell)
+[![Dependencies Status](https://gemnasium.com/supki/guard-haskell.png)](https://gemnasium.com/supki/guard-haskell)
+
 
 `Guard::Haskell` automatically runs your specs
 
