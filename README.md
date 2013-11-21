@@ -1,5 +1,6 @@
 guard-haskell
 =============
+[![Gem Version](https://badge.fury.io/rb/guard-haskell.png)](http://badge.fury.io/rb/guard-haskell)
 [![Build Status](https://secure.travis-ci.org/supki/guard-haskell.png?branch=master)](http://travis-ci.org/supki/guard-haskell)
 [![Dependencies Status](https://gemnasium.com/supki/guard-haskell.png)](https://gemnasium.com/supki/guard-haskell)
 
@@ -10,11 +11,7 @@ guard-haskell
 
 ```shell
 % cabal install hspec
-% gem install guard
-% git clone https://github.com/supki/guard-haskell
-% cd guard-haskell
-% gem build guard-haskell.gemspec
-% gem install guard-haskell-0.1.0.0.gem
+% gem install guard-haskell
 ```
 
 # Usage
