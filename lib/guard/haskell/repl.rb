@@ -22,7 +22,10 @@ class ::Guard::Haskell::Repl
           when /\d+ examples?, 0 failures/
             @success = true
             @running = false
-          when /\d+ examples?, \d+ failures?/, /Failed, modules loaded:/, /\*{3} Exception:/
+          when /\d+ examples?, \d+ failures?/,
+               /Failed, modules loaded:/,
+               /\*{3} Exception:/,
+               /phase `C preprocessor' failed/
             @success = false
             @running = false
           end
