@@ -36,9 +36,8 @@ Typical haskell project:
 
 ```ruby
 guard :haskell do
-  watch(%r{.*\.cabal$})
-  watch(%r{test/.+Spec.l?hs$})
-  watch(%r{src/.+.l?hs$})
+  watch(%r{test/.+Spec\.l?hs$})
+  watch(%r{src/.+\.l?hs$})
 end
 ```
 
@@ -46,10 +45,9 @@ Customized haskell project:
 
 ```ruby
 guard :haskell, all_on_pass: true, ghci_options: ["-DTEST"] do
-  watch(%r{.*\.cabal$})
-  watch(%r{test/.+Spec.l?hs$})
-  watch(%r{lib/.+.l?hs$})
-  watch(%r{bin/.+.l?hs$})
+  watch(%r{test/.+Spec\.l?hs$})
+  watch(%r{lib/.+\.l?hs$})
+  watch(%r{bin/.+\.l?hs$})
 end
 ```
 
