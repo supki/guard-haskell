@@ -1,4 +1,3 @@
-require 'io/wait'
 require 'open3'
 
 class ::Guard::Haskell::Repl
@@ -19,9 +18,7 @@ class ::Guard::Haskell::Repl
     @stdin, stdout, @thread = ::Open3.popen2e(*cmd)
     @reader = ::Thread.new do
       loop do
-        n = stdout.nread
-        if n > 0
-          out = stdout.read(n)
+        while (out = stdout.gets)
           print out
           if @running
             case out
@@ -38,8 +35,6 @@ class ::Guard::Haskell::Repl
               @running = false
             end
           end
-        else
-          sleep(0.1)
         end
       end
     end
