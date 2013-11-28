@@ -2,7 +2,12 @@ require 'io/wait'
 require 'open3'
 
 class ::Guard::Haskell::Repl
-  attr_reader :stdin, :reader, :thread, :success
+  attr_reader :stdin, :reader, :thread, :result
+
+  def initialize
+    @running = false
+    @result  = :success
+  end
 
   def start ghci_options
     cmd = ["ghci"]
@@ -21,13 +26,15 @@ class ::Guard::Haskell::Repl
           if @running
             case out
             when /\d+ examples?, 0 failures/
-              @success = true
+              @result  = :success
               @running = false
-            when /\d+ examples?, \d+ failures?/,
-                 /Failed, modules loaded:/,
+            when /\d+ examples?, \d+ failures?/
+              @result  = :runtime_failure
+              @running = false
+            when /Failed, modules loaded:/,
                  /\*{3} Exception:/,
                  /phase `C preprocessor' failed/
-              @success = false
+              @result  = :compile_failure
               @running = false
             end
           end
@@ -59,9 +66,9 @@ class ::Guard::Haskell::Repl
     _repl ":reload\n:main --color --rerun\n"
   end
 
-  def success?
+  def result
     while @running do sleep(0.01) end
-    @success
+    @result
   end
 
   def _repl command

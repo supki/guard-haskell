@@ -22,7 +22,7 @@ module ::Guard
 
     require 'guard/haskell/repl'
 
-    attr_reader :repl, :top_spec, :ghci_options, :targets
+    attr_reader :repl, :top_spec, :ghci_options, :targets, :last_run
     attr_reader :all_on_start, :all_on_pass
 
     def initialize options = {}
@@ -61,25 +61,35 @@ module ::Guard
     end
 
     def run pattern
-      if @last_run == :success
-        repl.run(pattern)
-      else
+      if last_run == :runtime_failure
         repl.rerun
+      else
+        repl.run(pattern)
       end
     end
 
     def success?
-      if repl.success?
-        if @last_run == :failure
-          @last_run = :success
-          if all_on_pass
-            run_all
-            success?
-          end
-        end
+      case [last_run, repl.result]
+      when [:runtime_failure, :success],
+          [:compile_failure, :success]
+        @last_run = :success
         Notifier.notify('Success')
-      else
-        @last_run = :failure
+        if all_on_pass
+          run_all
+          success?
+        end
+      when [:success, :success]
+        Notifier.notify('Success')
+      when [:runtime_failure, :compile_failure],
+        [:runtime_failure, :runtime_failure],
+        [:compile_failure, :compile_failure]
+        Notifier.notify('Failure', image: :failed)
+      when [:compile_failure, :runtime_failure],
+        [:success, :runtime_failure]
+        @last_run = :runtime_failure
+        Notifier.notify('Failure', image: :failed)
+      when [:success, :compile_failure]
+        @last_run = :compile_failure
         Notifier.notify('Failure', image: :failed)
       end
     end

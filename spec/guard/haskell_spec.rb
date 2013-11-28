@@ -119,9 +119,17 @@ describe ::Guard::Haskell do
       guard.run("Foo")
     end
 
-    it "reruns previous specs if last run was a failure" do
+    it "runs specs matching pattern if last run was a compile time failure" do
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      guard.instance_variable_set(:@last_run, :compile_failure)
+
+      guard.start
+      guard.run("Foo")
+    end
+
+    it "reruns previous specs if last run was a runtime failure" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:rerun)
-      guard.instance_variable_set(:@last_run, :failure)
+      guard.instance_variable_set(:@last_run, :runtime_failure)
 
       guard.start
       guard.run("Foo")
@@ -129,26 +137,69 @@ describe ::Guard::Haskell do
   end
 
   describe "#success" do
-    it "notifies on success" do
-      ::Guard::Haskell::Repl.any_instance.stub(:success?) { true }
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
-      expect(::Guard::Notifier).to receive(:notify).with('Success')
-      guard.instance_variable_set(:@last_run, :failure)
+    def notify(before, received, after)
+      ::Guard::Haskell::Repl.any_instance.stub(:result) { received }
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
+      yield
+      guard.instance_variable_set(:@last_run, before)
 
       guard.start
       guard.success?
-      expect(guard.instance_variable_get(:@last_run)).to eq(:success)
+      expect(guard.instance_variable_get(:@last_run)).to eq(after)
     end
 
-    it "notifies on failure" do
-      ::Guard::Haskell::Repl.any_instance.stub(:success?) { false }
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
-      expect(::Guard::Notifier).to receive(:notify).with('Failure', image: :failed)
-      guard.instance_variable_set(:@last_run, :success)
+    it "notifies on success after success" do
+      notify(:success, :success, :success) do
+        expect(::Guard::Notifier).to receive(:notify).with('Success')
+      end
+    end
 
-      guard.start
-      guard.success?
-      expect(guard.instance_variable_get(:@last_run)).to eq(:failure)
+    it "notifies on success after runtime failure" do
+      notify(:runtime_failure, :success, :success) do
+        expect(::Guard::Notifier).to receive(:notify).with('Success')
+      end
+    end
+
+    it "notifies on success after compile time failure" do
+      notify(:compile_failure, :success, :success) do
+        expect(::Guard::Notifier).to receive(:notify).with('Success')
+      end
+    end
+
+    it "notifies on runtime failure after success" do
+      notify(:success, :runtime_failure, :runtime_failure) do
+        expect(::Guard::Notifier).to receive(:notify).with('Failure', image: :failed)
+      end
+    end
+
+    it "notifies on runtime failure after runtime failure" do
+      notify(:runtime_failure, :runtime_failure, :runtime_failure) do
+        expect(::Guard::Notifier).to receive(:notify).with('Failure', image: :failed)
+      end
+    end
+
+    it "notifies on runtime failure after compile time failure" do
+      notify(:compile_failure, :runtime_failure, :runtime_failure) do
+        expect(::Guard::Notifier).to receive(:notify).with('Failure', image: :failed)
+      end
+    end
+
+    it "notifies on compile time failure after success" do
+      notify(:success, :compile_failure, :compile_failure) do
+        expect(::Guard::Notifier).to receive(:notify).with('Failure', image: :failed)
+      end
+    end
+
+    it "notifies on compile time failure after runtime failure" do
+      notify(:runtime_failure, :compile_failure, :runtime_failure) do
+        expect(::Guard::Notifier).to receive(:notify).with('Failure', image: :failed)
+      end
+    end
+
+    it "notifies on compile time failure after compile time failure" do
+      notify(:compile_failure, :compile_failure, :compile_failure) do
+        expect(::Guard::Notifier).to receive(:notify).with('Failure', image: :failed)
+      end
     end
 
     it "does not run all specs on success after failure by default" do
@@ -161,10 +212,21 @@ describe ::Guard::Haskell do
       guard.success?
     end
 
-    it "runs all specs on success after failure with :all_on_pass option" do
-      ::Guard::Haskell::Repl.any_instance.stub(:success?) { true }
+    it "runs all specs on success after runtime failure with :all_on_pass option" do
+      ::Guard::Haskell::Repl.any_instance.stub(:result) { :success }
       custom_guard = ::Guard::Haskell.new(all_on_pass: true)
-      custom_guard.instance_variable_set(:@last_run, :failure)
+      custom_guard.instance_variable_set(:@last_run, :runtime_failure)
+
+      expect(custom_guard).to receive(:run_all)
+
+      custom_guard.start
+      custom_guard.success?
+    end
+
+    it "runs all specs on success after compile time failure with :all_on_pass option" do
+      ::Guard::Haskell::Repl.any_instance.stub(:result) { :success }
+      custom_guard = ::Guard::Haskell.new(all_on_pass: true)
+      custom_guard.instance_variable_set(:@last_run, :compile_failure)
 
       expect(custom_guard).to receive(:run_all)
 
@@ -194,7 +256,7 @@ describe ::Guard::Haskell do
   describe "#run_on_modifications" do
     it "run specs for simple haskell files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
 
       guard.start
       guard.run_on_modifications(["Foo.hs"])
@@ -202,7 +264,7 @@ describe ::Guard::Haskell do
 
     it "run specs for simple literate haskell files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
 
       guard.start
       guard.run_on_modifications(["Foo.lhs"])
@@ -210,7 +272,7 @@ describe ::Guard::Haskell do
 
     it "run specs for *complex* haskell files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Bar.Baz")
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
 
       guard.start
       guard.run_on_modifications(["foo/Bar/Baz.hs"])
@@ -218,7 +280,7 @@ describe ::Guard::Haskell do
 
     it "run specs for simple haskell spec files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
 
       guard.start
       guard.run_on_modifications(["FooSpec.hs"])
@@ -226,7 +288,7 @@ describe ::Guard::Haskell do
 
     it "run specs for simple literate haskell spec files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
 
       guard.start
       guard.run_on_modifications(["FooSpec.lhs"])
@@ -234,7 +296,7 @@ describe ::Guard::Haskell do
 
     it "run specs for *complex* haskell spec files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Bar.Baz")
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:success?)
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
 
       guard.start
       guard.run_on_modifications(["foo/Bar/BazSpec.hs"])
