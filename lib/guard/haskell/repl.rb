@@ -30,7 +30,8 @@ class ::Guard::Haskell::Repl
               @running = false
             when /Failed, modules loaded:/,
                  /\*{3} Exception:/,
-                 /phase `C preprocessor' failed/
+                 /phase `C preprocessor' failed/,
+                 /^GHCi runtime linker: fatal error:/
               @result  = :compile_failure
               @running = false
             end

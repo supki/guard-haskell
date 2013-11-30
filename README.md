@@ -71,6 +71,28 @@ Pass custom ghci options, for example, `-XCPP` directives like `-DTEST` (default
 
 "Top" spec location (default: `test/Spec.hs`).
 
+## Known problems
+
+### App you test uses the GHC API
+
+Unfortunately, testing such applications with `guard-haskell` is basically impossible
+because `ghci` uses `GHC API` too.  Sooner or later you will see something like:
+
+```
+GHCi runtime linker: fatal error: I found a duplicate definition for symbol
+   HUnitzm1zi2zi5zi2_TestziHUnitziBase_zdwzdcshowsPrec_slow
+whilst processing object file
+   /home/maksenov/.cabal/lib/HUnit-1.2.5.2/ghc-7.6.2/HSHUnit-1.2.5.2.o
+This could be caused by:
+   * Loading two different object files which export the same symbol
+   * Specifying the same object file twice on the GHCi command line
+   * An incorrect `package.conf' entry, causing some object to be
+     loaded twice.
+GHCi cannot safely continue in this situation.  Exiting now.  Sorry.
+```
+
+Fragile concurrent access is a known limitation of the `GHC API`, which hopefully will be eventually fixed.
+
   [0]: https://github.com/guard/guard#readme
   [1]: http://hspec.github.io/
   [2]: http://hspec.github.io/hspec-discover.html
