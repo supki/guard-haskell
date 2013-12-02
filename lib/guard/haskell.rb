@@ -43,7 +43,6 @@ module ::Guard
 
       if all_on_start
         run_all
-        success?
       end
     end
 
@@ -58,6 +57,7 @@ module ::Guard
 
     def run_all
       repl.run
+      success?
     end
 
     def run pattern
@@ -66,6 +66,7 @@ module ::Guard
       else
         repl.run(pattern)
       end
+      success?
     end
 
     def success?
@@ -76,7 +77,6 @@ module ::Guard
         Notifier.notify('Success')
         if all_on_pass
           run_all
-          success?
         end
       when [:success, :success]
         Notifier.notify('Success')
@@ -105,7 +105,6 @@ module ::Guard
       case paths.first
       when /(.+)Spec\.l?hs$/, /(.+)\.l?hs$/
         run($1.strip_lowercase_directories.path_to_module_name)
-        success?
       end
     end
   end

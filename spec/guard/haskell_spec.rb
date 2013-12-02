@@ -79,7 +79,7 @@ describe ::Guard::Haskell do
     it "runs all specs on start with :all_on_start option enabled" do
       custom_guard = ::Guard::Haskell.new(all_on_start: true)
 
-      expect(custom_guard).to receive(:run_all)
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run)
       expect(custom_guard).to receive(:success?)
 
       custom_guard.start
@@ -111,6 +111,15 @@ describe ::Guard::Haskell do
   end
 
   describe "#run" do
+    it "checks success after run" do
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect(guard).to receive(:success?)
+      guard.instance_variable_set(:@last_run, :success)
+
+      guard.start
+      guard.run("Foo")
+    end
+
     it "runs specs matching pattern if last run was a success" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
       guard.instance_variable_set(:@last_run, :success)
@@ -133,6 +142,17 @@ describe ::Guard::Haskell do
 
       guard.start
       guard.run("Foo")
+    end
+  end
+
+  describe "#run_all" do
+    it "checks success after run" do
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run)
+      expect(guard).to receive(:success?)
+      guard.instance_variable_set(:@last_run, :success)
+
+      guard.start
+      guard.run_all
     end
   end
 
