@@ -20,7 +20,7 @@ guard-haskell
 
 For explanation what `guard` is and how to use it, please refer to the [`guard manual`][0]
 
-`guard-haskell` uses [`hspec`][1] to run specs and check their success, so it makes some assumptions about your code style:
+`guard-haskell` uses [`hspec`][1] to run specs and check results, so it makes some assumptions about your code style:
 
   * `hspec` is your testing framework and
 
@@ -57,11 +57,15 @@ end
 
 ### `all_on_start`
 
-Run all specs on start (default: `false`).
+Run all examples on start (default: `false`).
 
 ### `all_on_pass`
 
-Run all specs after previously failing spec _finally_ passes (default: `false`).
+Run all examples after previously failing spec _finally_ passes (default: `false`).
+
+### `focus_on_fail`
+
+Rerun only failed examples until they pass (default: `true`).
 
 ### `ghci_options`
 

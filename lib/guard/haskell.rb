@@ -23,16 +23,29 @@ module ::Guard
     require 'guard/haskell/repl'
 
     attr_reader :repl, :top_spec, :ghci_options, :targets, :last_run
-    attr_reader :all_on_start, :all_on_pass
+    attr_reader :all_on_start, :all_on_pass, :focus_on_fail
 
-    def initialize options = {}
+    DEFAULT_OPTIONS = {
+      top_spec:      "test/Spec.hs",
+      ghci_options:  [],
+      all_on_start:  false,
+      all_on_pass:   false,
+      focus_on_fail: true,
+    }
+
+    def initialize(user_options = {})
       super
-      @last_run     = :success # try to prove it wasn't :-)
-      @top_spec     = options[:top_spec] || "test/Spec.hs"
-      @ghci_options = options[:ghci_options] || []
-      @all_on_start = options[:all_on_start] || false
-      @all_on_pass  = options[:all_on_pass] || false
-      @repl         = Repl.new
+
+      @last_run      = :success # try to prove it wasn't :-)
+
+      options        = DEFAULT_OPTIONS.merge(user_options)
+      @top_spec      = options[:top_spec]
+      @ghci_options  = options[:ghci_options]
+      @all_on_start  = options[:all_on_start]
+      @all_on_pass   = options[:all_on_pass]
+      @focus_on_fail = options[:focus_on_fail]
+
+      @repl          = Repl.new
     end
 
     def start
@@ -61,7 +74,7 @@ module ::Guard
     end
 
     def run pattern
-      if last_run == :runtime_failure
+      if focus_on_fail and last_run == :runtime_failure
         repl.rerun
       else
         repl.run(pattern)
