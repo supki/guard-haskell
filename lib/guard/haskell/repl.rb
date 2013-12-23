@@ -26,7 +26,7 @@ class ::Guard::Haskell::Repl
     cmd = ["ghci"]
     Dir["*"].each { |d| cmd << "-i#{d}" if File.directory?(d) }
     sandbox = ::Dir[".cabal-sandbox/*packages.conf.d"].first
-    cmd << "-package-db=#{sandbox}" if sandbox
+    cmd.concat(["-no-user-package-db", "-package-db=#{sandbox}"]) if sandbox
     cmd.concat(ghci_options)
 
     @stdin, stdout, @thread = ::Open3.popen2e(*cmd)

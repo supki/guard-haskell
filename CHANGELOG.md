@@ -1,7 +1,8 @@
 1.3.0
 =====
 
-  * Catch CPP failures (previously didn't work because of the typo)
+  * Ignore user cabal package database if sandbox is found
+  * Catch CPP failures (previously did n't work because of the typo)
   * Add `focus_on_fail` option
 
 1.2.0
