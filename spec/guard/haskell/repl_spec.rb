@@ -104,7 +104,7 @@ describe ::Guard::Haskell::Repl do
 
         repl.send(:listen, in_stream, out_stream)
 
-        expect(repl.instance_variable_get(:@running)).to be_false
+        expect(repl.instance_variable_get(:@running)).to eq(false)
         expect(repl.instance_variable_get(:@result)).to eq(:success)
       end
 
@@ -132,7 +132,7 @@ describe ::Guard::Haskell::Repl do
 
         repl.send(:listen, in_stream, out_stream)
 
-        expect(repl.instance_variable_get(:@running)).to be_false
+        expect(repl.instance_variable_get(:@running)).to eq(false)
         expect(repl.instance_variable_get(:@result)).to eq(:runtime_failure)
       end
 
@@ -154,7 +154,7 @@ describe ::Guard::Haskell::Repl do
 
         repl.send(:listen, in_stream, out_stream)
 
-        expect(repl.instance_variable_get(:@running)).to be_false
+        expect(repl.instance_variable_get(:@running)).to eq(false)
         expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
       end
 
@@ -169,7 +169,7 @@ describe ::Guard::Haskell::Repl do
 
         repl.send(:listen, in_stream, out_stream)
 
-        expect(repl.instance_variable_get(:@running)).to be_false
+        expect(repl.instance_variable_get(:@running)).to eq(false)
         expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
       end
 
@@ -187,7 +187,7 @@ describe ::Guard::Haskell::Repl do
 
         repl.send(:listen, in_stream, out_stream)
 
-        expect(repl.instance_variable_get(:@running)).to be_false
+        expect(repl.instance_variable_get(:@running)).to eq(false)
         expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
       end
     end

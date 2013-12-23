@@ -46,23 +46,23 @@ describe ::Guard::Haskell do
 
   describe ".initialize" do
     it "has :all_on_start option" do
-      expect(guard.instance_variable_defined?(:@all_on_start)).to be_true
+      expect(guard.instance_variable_defined?(:@all_on_start)).to eq(true)
     end
 
     it "has :all_on_pass option" do
-      expect(guard.instance_variable_defined?(:@all_on_pass)).to be_true
+      expect(guard.instance_variable_defined?(:@all_on_pass)).to eq(true)
     end
 
     it "has :focus_on_fail option" do
-      expect(guard.instance_variable_defined?(:@focus_on_fail)).to be_true
+      expect(guard.instance_variable_defined?(:@focus_on_fail)).to eq(true)
     end
 
     it "has :ghci_options option" do
-      expect(guard.instance_variable_defined?(:@ghci_options)).to be_true
+      expect(guard.instance_variable_defined?(:@ghci_options)).to eq(true)
     end
 
     it "has :top_spec option" do
-      expect(guard.instance_variable_defined?(:@top_spec)).to be_true
+      expect(guard.instance_variable_defined?(:@top_spec)).to eq(true)
     end
   end
 
