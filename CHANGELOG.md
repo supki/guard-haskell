@@ -1,3 +1,8 @@
+1.4.0
+=====
+
+  * Catch more obscure runtime linker errors
+
 1.3.0
 =====
 

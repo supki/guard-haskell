@@ -136,7 +136,7 @@ describe ::Guard::Haskell::Repl do
         expect(repl.instance_variable_get(:@result)).to eq(:runtime_failure)
       end
 
-      it "handles runtime linker error" do
+      it 'handles "duplicate definition" runtime linker error' do
         in_stream = ::StringIO.open(<<-FOO)
           GHCi runtime linker: fatal error: I found a duplicate definition for symbol
              HUnitzm1zi2zi5zi2_TestziHUnitziBase_zdwzdcshowsPrec_slow
@@ -148,6 +148,28 @@ describe ::Guard::Haskell::Repl do
              * An incorrect `package.conf' entry, causing some object to be
                loaded twice.
           GHCi cannot safely continue in this situation.  Exiting now.  Sorry.
+        FOO
+        out_stream = File.open("/dev/null", "w")
+        repl.instance_variable_set(:@running, true)
+
+        repl.send(:listen, in_stream, out_stream)
+
+        expect(repl.instance_variable_get(:@running)).to eq(false)
+        expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
+      end
+
+      # Unfortunately I can't remember why it happened :-(
+      it 'handles "couldn\'t find symbol" runtime linker error' do
+        in_stream = ::StringIO.open(<<-FOO)
+          During interactive linking, GHCi couldn't find the following symbol:
+            Conf_zuverbose_closure
+            This may be due to you not asking GHCi to load extra object files,
+            archives or DLLs needed by your current session.  Restart GHCi, specifying
+            the missing library using the -L/path/to/object/dir and -lmissinglibname
+            flags, or simply by naming the relevant files on the GHCi command line.
+            Alternatively, this link failure might indicate a bug in GHCi.
+            If you suspect the latter, please send a bug report to:
+              glasgow-haskell-bugs@haskell.org
         FOO
         out_stream = File.open("/dev/null", "w")
         repl.instance_variable_set(:@running, true)

@@ -17,7 +17,8 @@ class ::Guard::Haskell::Repl
     when /Failed, modules loaded:/,
          /\*{3} Exception:/,
          /phase `C pre-processor' failed/,
-         /GHCi runtime linker: fatal error:/
+         /GHCi runtime linker: fatal error:/,
+         /During interactive linking, GHCi couldn't find the following symbol:/
       :compile_failure
     end
   end
