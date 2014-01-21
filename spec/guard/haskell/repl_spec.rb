@@ -1,6 +1,9 @@
 require 'spec_helper'
 require 'guard/notifier'
 
+dev_null = ::File.open("/dev/null", "w")
+run_file = ->(file) { "spec/run-files/#{file}" }
+
 describe ::Guard::Haskell::Repl do
   let(:repl) do
     ::Guard::Haskell::Repl.new
@@ -87,72 +90,31 @@ describe ::Guard::Haskell::Repl do
 
   describe '#listen' do
     context 'real world' do
-      it "handles typical passed run" do
-        in_stream = ::StringIO.open(<<-FOO)
-          Useful.Git
-            fromGraph
-              - creates `git init' script from empty graph
-              - creates git script from two-node graph
-              - creates git script from three-node graph
-              - creates git script from three-node chain graph
-
-          Finished in 0.0054 seconds
-          4 examples, 0 failures
-        FOO
-        out_stream = File.open("/dev/null", "w")
+      it "handles typical pass run" do
+        in_stream  = ::File.open(run_file["spec-pass.success"])
         repl.instance_variable_set(:@running, true)
 
-        repl.send(:listen, in_stream, out_stream)
+        repl.send(:listen, in_stream, dev_null)
 
         expect(repl.instance_variable_get(:@running)).to eq(false)
         expect(repl.instance_variable_get(:@result)).to eq(:success)
       end
 
-      it "handles typical failed spec run" do
-        in_stream = ::StringIO.open(<<-FOO)
-          Useful.Git
-            fromGraph
-              - creates `git init' script from empty graph
-              - creates git script from two-node graph FAILED [1]
-              - creates git script from three-node graph
-              - creates git script from three-node chain graph
-
-          1) Useful.Git.fromGraph creates git script from two-node graph
-          expected: Just [InitE,OrphanE "foo" "7",CommitE "bar" ["1"] "2"]
-           but got: Just [InitE,OrphanE "foo" "1",CommitE "bar" ["1"] "2"]
-
-          Randomized with seed 4611685481380198536
-
-          Finished in 0.0089 seconds
-          4 examples, 1 failure
-          *** Exception: ExitFailure 1
-        FOO
-        out_stream = File.open("/dev/null", "w")
+      it "handles typical failure run" do
+        in_stream  = ::File.open(run_file["spec-failure.error"])
         repl.instance_variable_set(:@running, true)
 
-        repl.send(:listen, in_stream, out_stream)
+        repl.send(:listen, in_stream, dev_null)
 
         expect(repl.instance_variable_get(:@running)).to eq(false)
         expect(repl.instance_variable_get(:@result)).to eq(:runtime_failure)
       end
 
       it 'handles "duplicate definition" runtime linker error' do
-        in_stream = ::StringIO.open(<<-FOO)
-          GHCi runtime linker: fatal error: I found a duplicate definition for symbol
-             HUnitzm1zi2zi5zi2_TestziHUnitziBase_zdwzdcshowsPrec_slow
-          whilst processing object file
-             /home/maksenov/.cabal/lib/HUnit-1.2.5.2/ghc-7.6.2/HSHUnit-1.2.5.2.o
-          This could be caused by:
-             * Loading two different object files which export the same symbol
-             * Specifying the same object file twice on the GHCi command line
-             * An incorrect `package.conf' entry, causing some object to be
-               loaded twice.
-          GHCi cannot safely continue in this situation.  Exiting now.  Sorry.
-        FOO
-        out_stream = File.open("/dev/null", "w")
+        in_stream  = ::File.open(run_file["runtime-linker-duplicate-definition-for-symbol.error"])
         repl.instance_variable_set(:@running, true)
 
-        repl.send(:listen, in_stream, out_stream)
+        repl.send(:listen, in_stream, dev_null)
 
         expect(repl.instance_variable_get(:@running)).to eq(false)
         expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
@@ -160,54 +122,30 @@ describe ::Guard::Haskell::Repl do
 
       # Unfortunately I can't remember why it happened :-(
       it 'handles "couldn\'t find symbol" runtime linker error' do
-        in_stream = ::StringIO.open(<<-FOO)
-          During interactive linking, GHCi couldn't find the following symbol:
-            Conf_zuverbose_closure
-            This may be due to you not asking GHCi to load extra object files,
-            archives or DLLs needed by your current session.  Restart GHCi, specifying
-            the missing library using the -L/path/to/object/dir and -lmissinglibname
-            flags, or simply by naming the relevant files on the GHCi command line.
-            Alternatively, this link failure might indicate a bug in GHCi.
-            If you suspect the latter, please send a bug report to:
-              glasgow-haskell-bugs@haskell.org
-        FOO
-        out_stream = File.open("/dev/null", "w")
+        in_stream  = ::File.open(run_file["runtime-linker-couldn't-find-symbol.error"])
         repl.instance_variable_set(:@running, true)
 
-        repl.send(:listen, in_stream, out_stream)
+        repl.send(:listen, in_stream, dev_null)
 
         expect(repl.instance_variable_get(:@running)).to eq(false)
         expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
       end
 
       it "handles hspec exceptions" do
-        in_stream = ::StringIO.open(<<-FOO)
-          *Main> Ok, modules loaded: Main, Useful.Parser, Useful.Graph, Useful.Git.
-          *Main>
-          *** Exception: Prelude.undefined
-        FOO
-        out_stream = File.open("/dev/null", "w")
+        in_stream  = ::File.open(run_file["hspec-exception.error"])
         repl.instance_variable_set(:@running, true)
 
-        repl.send(:listen, in_stream, out_stream)
+        repl.send(:listen, in_stream, dev_null)
 
         expect(repl.instance_variable_get(:@running)).to eq(false)
         expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
       end
 
       it "handles CPP exceptions" do
-        in_stream = ::StringIO.open(<<-FOO)
-          *Main>
-          test/Useful/GitSpec.hs:4:0:
-               error: invalid preprocessing directive #ifd
-               #ifd
-               ^
-          phase `C pre-processor' failed (exitcode = 1)
-        FOO
-        out_stream = File.open("/dev/null", "w")
+        in_stream  = ::File.open(run_file["cpp-exception.error"])
         repl.instance_variable_set(:@running, true)
 
-        repl.send(:listen, in_stream, out_stream)
+        repl.send(:listen, in_stream, dev_null)
 
         expect(repl.instance_variable_get(:@running)).to eq(false)
         expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)

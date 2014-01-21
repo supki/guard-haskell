@@ -1,0 +1,16 @@
+Useful.Git
+  fromGraph
+    - creates `git init' script from empty graph
+    - creates git script from two-node graph FAILED [1]
+    - creates git script from three-node graph
+    - creates git script from three-node chain graph
+
+1) Useful.Git.fromGraph creates git script from two-node graph
+expected: Just [InitE,OrphanE "foo" "7",CommitE "bar" ["1"] "2"]
+ but got: Just [InitE,OrphanE "foo" "1",CommitE "bar" ["1"] "2"]
+
+Randomized with seed 4611685481380198536
+
+Finished in 0.0089 seconds
+4 examples, 1 failure
+*** Exception: ExitFailure 1

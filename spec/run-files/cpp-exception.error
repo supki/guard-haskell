@@ -1,0 +1,6 @@
+*Main>
+test/Useful/GitSpec.hs:4:0:
+     error: invalid preprocessing directive #ifd
+     #ifd
+     ^
+phase `C pre-processor' failed (exitcode = 1)

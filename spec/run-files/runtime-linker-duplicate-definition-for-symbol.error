@@ -1,0 +1,10 @@
+GHCi runtime linker: fatal error: I found a duplicate definition for symbol
+   HUnitzm1zi2zi5zi2_TestziHUnitziBase_zdwzdcshowsPrec_slow
+whilst processing object file
+   /home/maksenov/.cabal/lib/HUnit-1.2.5.2/ghc-7.6.2/HSHUnit-1.2.5.2.o
+This could be caused by:
+   * Loading two different object files which export the same symbol
+   * Specifying the same object file twice on the GHCi command line
+   * An incorrect `package.conf' entry, causing some object to be
+     loaded twice.
+GHCi cannot safely continue in this situation.  Exiting now.  Sorry.

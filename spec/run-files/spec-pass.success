@@ -1,0 +1,9 @@
+Useful.Git
+  fromGraph
+    - creates `git init' script from empty graph
+    - creates git script from two-node graph
+    - creates git script from three-node graph
+    - creates git script from three-node chain graph
+
+Finished in 0.0054 seconds
+4 examples, 0 failures
