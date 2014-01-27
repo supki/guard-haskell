@@ -1,3 +1,8 @@
+1.5.0
+=====
+
+  * Add `sandbox_glob` option
+
 1.4.0
 =====
 
