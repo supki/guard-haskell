@@ -23,15 +23,25 @@ class ::Guard::Haskell::Repl
     end
   end
 
-  def start ghci_options
+  def start(ghci_options)
     cmd = ["ghci"]
+
     Dir["*"].each { |d| cmd << "-i#{d}" if File.directory?(d) }
-    sandbox = ::Dir[".cabal-sandbox/*packages.conf.d"].last
-    cmd.concat(["-no-user-package-db", "-package-db=#{sandbox}"]) if sandbox
+    lookup_sandbox(cmd)
     cmd.concat(ghci_options)
 
     @stdin, stdout, @thread = ::Open3.popen2e(*cmd)
     @listener = ::Thread.new { listen(stdout, STDOUT) }
+  end
+
+  def lookup_sandbox(cmd)
+    sandboxes = Sandbox.new(".cabal-sandbox/*packages.conf.d")
+    sandboxes.with_best_sandbox(->(str) { str.scan(/\d+/).map(&:to_i) }) do |best_sandbox|
+      puts "Cabal sandboxes found:"
+      sandboxes.each { |sandbox| puts "  #{sandbox}" }
+      puts "Cabal sandbox used:\n  #{best_sandbox}"
+      cmd.concat(["-no-user-package-db", "-package-db=#{best_sandbox}"])
+    end
   end
 
   def init(spec)
@@ -60,8 +70,27 @@ class ::Guard::Haskell::Repl
     @result
   end
 
-  private
+  class Sandbox
+    attr_reader :sandboxes
 
+    include ::Enumerable
+
+    def initialize(glob)
+      @sandboxes = ::Dir[glob]
+    end
+
+    def each(&block)
+      sandboxes.each(&block)
+    end
+
+    def with_best_sandbox(ordering)
+      best = sandboxes.max_by(&ordering)
+      yield best if best
+      best
+    end
+  end
+
+  private
     def repl(command)
       @running = true
       stdin.write(command)

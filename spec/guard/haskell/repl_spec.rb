@@ -1,3 +1,4 @@
+require 'fakefs/spec_helpers'
 require 'spec_helper'
 require 'guard/notifier'
 
@@ -151,5 +152,73 @@ describe ::Guard::Haskell::Repl do
         expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
       end
     end
+  end
+
+  describe "#lookup_sandbox" do
+    include FakeFS::SpecHelpers
+
+    before(:each) { ::IO.any_instance.stub(:puts) }
+
+    it "does not find anything if there are no sandboxes" do
+      expect_any_instance_of(::IO).not_to receive(:puts)
+      expect(repl.lookup_sandbox([])).to be_nil
+    end
+
+    it "finds as sandbox" do
+      ::FileUtils.mkdir_p([".cabal-sandbox/foo-bar-ghc-7.6.3-packages.conf.d"])
+      expect_any_instance_of(::IO).to receive(:puts).with("Cabal sandboxes found:")
+      expect(repl.lookup_sandbox([])).to eq("/.cabal-sandbox/foo-bar-ghc-7.6.3-packages.conf.d")
+    end
+
+    it "compares sandboxes cleverly" do
+      ::FileUtils.mkdir_p(
+          [ ".cabal-sandbox/foo-bar-ghc-1.0-packages.conf.d",
+            ".cabal-sandbox/foo-bar-ghc-1.1-packages.conf.d",
+            ".cabal-sandbox/foo-bar-ghc-1.2-packages.conf.d",
+            ".cabal-sandbox/foo-bar-ghc-1.10-packages.conf.d",
+          ])
+      expect(repl.lookup_sandbox([])).to eq("/.cabal-sandbox/foo-bar-ghc-1.10-packages.conf.d")
+    end
+  end
+end
+
+describe ::Guard::Haskell::Repl::Sandbox do
+  ::Sandbox = ::Guard::Haskell::Repl::Sandbox
+  include FakeFS::SpecHelpers
+
+  let(:id) { ->(x) { x } }
+  let(:reversed) { ->(str) { str.reverse } }
+
+  before(:each) { ::IO.any_instance.stub(:puts) }
+
+  it "has an empty list of sandboxes if no sandboxes are found" do
+    expect(::Sandbox.new("*").sandboxes).to eq([])
+  end
+
+  it "has a singleton list of sandboxes if one sandbox is found" do
+    ::FileUtils.touch(["foo", "bar", "baz"])
+    expect(::Sandbox.new("foo").sandboxes).to eq(["/foo"])
+  end
+
+  it "has a list of sandboxes if more than one sandbox is found" do
+    ::FileUtils.touch(["foo", "bar", "baz"])
+    expect(::Sandbox.new("ba*").sandboxes).to eq(["/bar", "/baz"])
+  end
+
+  it "has a nil for the best sandbox of an empty list of sandboxes" do
+    expect_any_instance_of(::IO).not_to receive(:puts)
+    expect(::Sandbox.new("*").with_best_sandbox(id) { |s| puts s }).to be_nil
+  end
+
+  it "chooses a \"maximum\" for the best sandbox" do
+    ::FileUtils.touch(["foo", "bar", "baz"])
+    expect_any_instance_of(::IO).to receive(:puts).with("/foo")
+    expect(::Sandbox.new("*").with_best_sandbox(id) { |s| puts s }).to eq("/foo")
+  end
+
+  it "chooses a \"maximum\" of the complex ordering for the best sandbox" do
+    ::FileUtils.touch(["foo", "bar", "baz", "zap"])
+    expect_any_instance_of(::IO).to receive(:puts).with("/baz")
+    expect(::Sandbox.new("*").with_best_sandbox(reversed) { |s| puts s }).to eq("/baz")
   end
 end
