@@ -30,6 +30,17 @@ For explanation what `guard` is and how to use it, please refer to the [`guard m
 When you type in `guard`, `guard-haskell` fires up an `ghci` instance which it talks to, reloading
 and rerunning (parts of) "top" spec on files modifications.
 
+## Guard::Haskell setup
+
+For `guard-haskell` to be ready to work we need a top level spec file and a Guardfile:
+
+```shell
+mkdir --parents test
+echo '{-# OPTIONS_GHC -F -pgmF hspec-discover #-}' > test/Spec.hs
+guard init haskell
+guard
+```
+
 ## Guardfile examples
 
 Typical haskell project:
