@@ -161,23 +161,29 @@ describe ::Guard::Haskell::Repl do
 
     it "does not find anything if there are no sandboxes" do
       expect_any_instance_of(::IO).not_to receive(:puts)
-      expect(repl.lookup_sandbox([])).to be_nil
+      expect(repl.lookup_sandbox([], "*packages.conf.d")).to be_nil
     end
 
-    it "finds as sandbox" do
+    it "finds a sandbox" do
+      ::FileUtils.mkdir_p(["ghc-7.6.3-packages.conf.d"])
+      expect_any_instance_of(::IO).to receive(:puts).with("Cabal sandboxes found:")
+      expect(repl.lookup_sandbox([], "*packages.conf.d")).to eq("/ghc-7.6.3-packages.conf.d")
+    end
+
+    it "finds a sandbox with the default settings" do
       ::FileUtils.mkdir_p([".cabal-sandbox/foo-bar-ghc-7.6.3-packages.conf.d"])
       expect_any_instance_of(::IO).to receive(:puts).with("Cabal sandboxes found:")
-      expect(repl.lookup_sandbox([])).to eq("/.cabal-sandbox/foo-bar-ghc-7.6.3-packages.conf.d")
+      expect(repl.lookup_sandbox([], ::Guard::Haskell::DEFAULT_OPTIONS[:sandbox_glob])).to eq("/.cabal-sandbox/foo-bar-ghc-7.6.3-packages.conf.d")
     end
 
     it "compares sandboxes cleverly" do
       ::FileUtils.mkdir_p(
-          [ ".cabal-sandbox/foo-bar-ghc-1.0-packages.conf.d",
-            ".cabal-sandbox/foo-bar-ghc-1.1-packages.conf.d",
-            ".cabal-sandbox/foo-bar-ghc-1.2-packages.conf.d",
-            ".cabal-sandbox/foo-bar-ghc-1.10-packages.conf.d",
+          [ "ghc-1.0-packages.conf.d",
+            "ghc-1.1-packages.conf.d",
+            "ghc-1.2-packages.conf.d",
+            "ghc-1.10-packages.conf.d",
           ])
-      expect(repl.lookup_sandbox([])).to eq("/.cabal-sandbox/foo-bar-ghc-1.10-packages.conf.d")
+      expect(repl.lookup_sandbox([], "*packages.conf.d")).to eq("/ghc-1.10-packages.conf.d")
     end
   end
 end

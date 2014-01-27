@@ -23,19 +23,19 @@ class ::Guard::Haskell::Repl
     end
   end
 
-  def start(ghci_options)
+  def start(ghci_options, sandbox_glob)
     cmd = ["ghci"]
 
     Dir["*"].each { |d| cmd << "-i#{d}" if File.directory?(d) }
-    lookup_sandbox(cmd)
+    lookup_sandbox(cmd, sandbox_glob)
     cmd.concat(ghci_options)
 
     @stdin, stdout, @thread = ::Open3.popen2e(*cmd)
     @listener = ::Thread.new { listen(stdout, STDOUT) }
   end
 
-  def lookup_sandbox(cmd)
-    sandboxes = Sandbox.new(".cabal-sandbox/*packages.conf.d")
+  def lookup_sandbox(cmd, sandbox_glob)
+    sandboxes = Sandbox.new(sandbox_glob)
     sandboxes.with_best_sandbox(->(str) { str.scan(/\d+/).map(&:to_i) }) do |best_sandbox|
       puts "Cabal sandboxes found:"
       sandboxes.each { |sandbox| puts "  #{sandbox}" }

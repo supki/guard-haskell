@@ -61,6 +61,10 @@ describe ::Guard::Haskell do
       expect(guard.instance_variable_defined?(:@ghci_options)).to eq(true)
     end
 
+    it "has :sandbox_glob option" do
+      expect(guard.instance_variable_defined?(:@sandbox_glob)).to eq(true)
+    end
+
     it "has :top_spec option" do
       expect(guard.instance_variable_defined?(:@top_spec)).to eq(true)
     end

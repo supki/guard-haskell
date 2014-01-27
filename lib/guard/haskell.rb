@@ -24,6 +24,7 @@ module ::Guard
 
     attr_reader :repl, :top_spec, :ghci_options, :targets, :last_run
     attr_reader :all_on_start, :all_on_pass, :focus_on_fail
+    attr_reader :sandbox_glob
 
     DEFAULT_OPTIONS = {
       top_spec:      "test/Spec.hs",
@@ -31,6 +32,7 @@ module ::Guard
       all_on_start:  false,
       all_on_pass:   false,
       focus_on_fail: true,
+      sandbox_glob: ".cabal-sandbox/*packages.conf.d",
     }
 
     def initialize(user_options = {})
@@ -44,12 +46,13 @@ module ::Guard
       @all_on_start  = options[:all_on_start]
       @all_on_pass   = options[:all_on_pass]
       @focus_on_fail = options[:focus_on_fail]
+      @sandbox_glob  = options[:sandbox_glob]
 
       @repl          = Repl.new
     end
 
     def start
-      repl.start(ghci_options)
+      repl.start(ghci_options, sandbox_glob)
       repl.init(top_spec)
 
       @targets = ::Set.new(::Dir.glob("**/*.{hs,lhs}"))

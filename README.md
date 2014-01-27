@@ -75,6 +75,10 @@ Pass custom ghci options, for example, `-XCPP` directives like `-DTEST` (default
 
 "Top" spec location (default: `test/Spec.hs`).
 
+### `sandbox_glob`
+
+A glob that matches cabal sandboxes (default: `.cabal-sandbox/*packages.conf.d`)
+
 ## Known problems
 
 ### App you test uses the GHC API
