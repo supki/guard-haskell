@@ -22,9 +22,16 @@ module ::Guard
 
     require 'guard/haskell/repl'
 
-    attr_reader :repl, :top_spec, :ghci_options, :targets, :last_run
-    attr_reader :all_on_start, :all_on_pass, :focus_on_fail
-    attr_reader :sandbox_glob
+    attr_reader :repl, :targets, :last_run, :opts
+
+    Options = Struct.new(
+      :top_spec,
+      :ghci_options,
+      :all_on_start,
+      :all_on_pass,
+      :focus_on_fail,
+      :sandbox_glob,
+    )
 
     DEFAULT_OPTIONS = {
       top_spec:      "test/Spec.hs",
@@ -38,26 +45,18 @@ module ::Guard
     def initialize(user_options = {})
       super
 
-      @last_run      = :success # try to prove it wasn't :-)
-
-      options        = DEFAULT_OPTIONS.merge(user_options)
-      @top_spec      = options[:top_spec]
-      @ghci_options  = options[:ghci_options]
-      @all_on_start  = options[:all_on_start]
-      @all_on_pass   = options[:all_on_pass]
-      @focus_on_fail = options[:focus_on_fail]
-      @sandbox_glob  = options[:sandbox_glob]
-
-      @repl          = Repl.new
+      @last_run = :success # try to prove it wasn't :-)
+      @opts     = Options.new(*DEFAULT_OPTIONS.merge(user_options).values)
+      @repl     = Repl.new
     end
 
     def start
-      repl.start(ghci_options, sandbox_glob)
-      repl.init(top_spec)
+      repl.start(opts.ghci_options, opts.sandbox_glob)
+      repl.init(opts.top_spec)
 
       @targets = ::Set.new(::Dir.glob("**/*.{hs,lhs}"))
 
-      if all_on_start
+      if opts.all_on_start
         run_all
       end
     end
@@ -77,7 +76,7 @@ module ::Guard
     end
 
     def run pattern
-      if focus_on_fail and last_run == :runtime_failure
+      if opts.focus_on_fail and last_run == :runtime_failure
         repl.rerun
       else
         repl.run(pattern)
@@ -91,7 +90,7 @@ module ::Guard
           [:compile_failure, :success]
         @last_run = :success
         Notifier.notify('Success')
-        if all_on_pass
+        if opts.all_on_pass
           run_all
         end
       when [:success, :success]
@@ -113,7 +112,7 @@ module ::Guard
     def run_on_additions paths
       unless paths.all? { |path| targets.include? path }
         @targets += paths
-        repl.init(top_spec)
+        repl.init(opts.top_spec)
       end
     end
 

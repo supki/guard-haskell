@@ -34,9 +34,7 @@ describe "monkey patching" do
 end
 
 describe ::Guard::Haskell do
-  let(:guard) do
-    ::Guard::Haskell.new
-  end
+  let(:guard) { ::Guard::Haskell.new }
 
   before :each do
     ::Guard.stub(:add_group)
@@ -45,28 +43,10 @@ describe ::Guard::Haskell do
   end
 
   describe ".initialize" do
-    it "has :all_on_start option" do
-      expect(guard.instance_variable_defined?(:@all_on_start)).to eq(true)
-    end
-
-    it "has :all_on_pass option" do
-      expect(guard.instance_variable_defined?(:@all_on_pass)).to eq(true)
-    end
-
-    it "has :focus_on_fail option" do
-      expect(guard.instance_variable_defined?(:@focus_on_fail)).to eq(true)
-    end
-
-    it "has :ghci_options option" do
-      expect(guard.instance_variable_defined?(:@ghci_options)).to eq(true)
-    end
-
-    it "has :sandbox_glob option" do
-      expect(guard.instance_variable_defined?(:@sandbox_glob)).to eq(true)
-    end
-
-    it "has :top_spec option" do
-      expect(guard.instance_variable_defined?(:@top_spec)).to eq(true)
+    ::Guard::Haskell::DEFAULT_OPTIONS.each do |key, value|
+      it "has :#{key} option" do
+        expect(::Guard::Haskell.new.opts.send(key)).to eq(value)
+      end
     end
   end
 
@@ -148,7 +128,7 @@ describe ::Guard::Haskell do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:rerun)
       expect_any_instance_of(::Guard::Haskell::Repl).not_to receive(:run).with("Foo")
       guard.instance_variable_set(:@last_run, :runtime_failure)
-      guard.instance_variable_set(:@focus_on_fail, true)
+      guard.opts.focus_on_fail = true
 
       guard.start
       guard.run("Foo")
@@ -158,7 +138,7 @@ describe ::Guard::Haskell do
       expect_any_instance_of(::Guard::Haskell::Repl).not_to receive(:rerun)
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
       guard.instance_variable_set(:@last_run, :runtime_failure)
-      guard.instance_variable_set(:@focus_on_fail, false)
+      guard.opts.focus_on_fail = false
 
       guard.start
       guard.run("Foo")
