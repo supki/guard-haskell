@@ -12,42 +12,53 @@ describe ::Guard::Haskell::Repl do
 
   describe '#init' do
     it "calls :load on ghci instance" do
-      expect(repl).to receive(:repl).with(/:load/)
+      expect(repl).to receive(:run_command_and_wait_for_result).with(/:load/)
       repl.init("Spec.hs")
     end
 
     it "loads provided spec" do
-      expect(repl).to receive(:repl).with(/FooBarSpec.hs/)
+      expect(repl).to receive(:run_command_and_wait_for_result).with(/FooBarSpec.hs/)
       repl.init("FooBarSpec.hs")
     end
   end
 
-  describe '#run' do
-    it "reloads the spec if no pattern is provided" do
-      expect(repl).to receive(:repl).with(/:reload/)
-      repl.run
+  context "running spec" do
+    before(:each) do
+      repl.stub(:run_command_and_wait_for_result) { |_| true }
     end
 
-    it "reloads the spec if a pattern is provided" do
-      expect(repl).to receive(:repl).with(/:reload/)
-      repl.run("FooBar")
+    describe '#reload_and_run_matching' do
+      it "reloads the spec if no pattern is provided" do
+        expect(repl).to receive(:run_command_and_wait_for_result).with(/:reload/)
+        repl.reload_and_run_matching
+      end
+
+      it "reloads the spec if a pattern is provided" do
+        expect(repl).to receive(:run_command_and_wait_for_result).with(/:reload/)
+        repl.reload_and_run_matching
+      end
+
+      it "provides a pattern for spec to match" do
+        expect(repl).to receive(:run_command_and_wait_for_result).with(/--match FooBar/)
+        repl.reload_and_run_matching("FooBar")
+      end
+
+      it "provides no pattern for spec to match if an argument is nil" do
+        expect(repl).not_to receive(:run_command_and_wait_for_result).with(/--match FooBar/)
+        repl.reload_and_run_matching(nil)
+      end
     end
 
-    it "provides a pattern for spec to match" do
-      expect(repl).to receive(:repl).with(/--match FooBar/)
-      repl.run("FooBar")
-    end
-  end
+    describe '#reload_and_rerun' do
+      it "reloads the spec" do
+        expect(repl).to receive(:run_command_and_wait_for_result).with(/:reload/)
+        repl.reload_and_rerun
+      end
 
-  describe '#rerun' do
-    it "reloads the spec" do
-      expect(repl).to receive(:repl).with(/:reload/)
-      repl.rerun
-    end
-
-    it "reruns the spec" do
-      expect(repl).to receive(:repl).with(/--rerun/)
-      repl.rerun
+      it "reruns the spec" do
+        expect(repl).to receive(:run_command_and_wait_for_result).with(/--rerun/)
+        repl.reload_and_rerun
+      end
     end
   end
 

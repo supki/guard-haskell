@@ -67,7 +67,7 @@ describe ::Guard::Haskell do
     it "runs all examples on start with :all_on_start option enabled" do
       custom_guard = ::Guard::Haskell.new(all_on_start: true)
 
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run)
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with(no_args)
       expect(custom_guard).to receive(:success?)
 
       custom_guard.start
@@ -100,7 +100,7 @@ describe ::Guard::Haskell do
 
   describe "#run" do
     it "checks success after run" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with("Foo")
       expect(guard).to receive(:success?)
       guard.instance_variable_set(:@last_run, :success)
 
@@ -109,7 +109,7 @@ describe ::Guard::Haskell do
     end
 
     it "runs examples matching pattern if last run was a success" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with("Foo")
       guard.instance_variable_set(:@last_run, :success)
 
       guard.start
@@ -117,7 +117,7 @@ describe ::Guard::Haskell do
     end
 
     it "runs examples matching pattern if last run was a compile time failure" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with("Foo")
       guard.instance_variable_set(:@last_run, :compile_failure)
 
       guard.start
@@ -125,8 +125,8 @@ describe ::Guard::Haskell do
     end
 
     it "reruns failing examples if last run was a runtime failure and @focus_on_fail is set" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:rerun)
-      expect_any_instance_of(::Guard::Haskell::Repl).not_to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_rerun)
+      expect_any_instance_of(::Guard::Haskell::Repl).not_to receive(:reload_and_run_matching).with("Foo")
       guard.instance_variable_set(:@last_run, :runtime_failure)
       guard.opts.focus_on_fail = true
 
@@ -135,8 +135,8 @@ describe ::Guard::Haskell do
     end
 
     it "runs examples matching pattern if last run was a runtime failure but @focus_on_fail is unset" do
-      expect_any_instance_of(::Guard::Haskell::Repl).not_to receive(:rerun)
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).not_to receive(:reload_and_rerun)
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with("Foo")
       guard.instance_variable_set(:@last_run, :runtime_failure)
       guard.opts.focus_on_fail = false
 
@@ -147,7 +147,7 @@ describe ::Guard::Haskell do
 
   describe "#run_all" do
     it "checks success after run" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run)
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching)
       expect(guard).to receive(:success?)
       guard.instance_variable_set(:@last_run, :success)
 
@@ -275,7 +275,7 @@ describe ::Guard::Haskell do
 
   describe "#run_on_modifications" do
     it "run examples for simple haskell files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with("Foo")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
 
       guard.start
@@ -283,7 +283,7 @@ describe ::Guard::Haskell do
     end
 
     it "run examples for simple literate haskell files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with("Foo")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
 
       guard.start
@@ -291,7 +291,7 @@ describe ::Guard::Haskell do
     end
 
     it "run examples for *complex* haskell files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Bar.Baz")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with("Bar.Baz")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
 
       guard.start
@@ -299,7 +299,7 @@ describe ::Guard::Haskell do
     end
 
     it "run examples for simple haskell spec files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with("Foo")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
 
       guard.start
@@ -307,7 +307,7 @@ describe ::Guard::Haskell do
     end
 
     it "run examples for simple literate haskell spec files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Foo")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with("Foo")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
 
       guard.start
@@ -315,7 +315,7 @@ describe ::Guard::Haskell do
     end
 
     it "run examples for *complex* haskell spec files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:run).with("Bar.Baz")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with("Bar.Baz")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
 
       guard.start

@@ -10,7 +10,8 @@ class ::Guard::Haskell::Repl
 
   def self.test(str)
     case str
-    when /\d+ examples?, 0 failures/
+    when /\d+ examples?, 0 failures/,
+         /Ok, modules loaded:/
       :success
     when /\d+ examples?, \d+ failures?/
       :runtime_failure
@@ -45,7 +46,7 @@ class ::Guard::Haskell::Repl
   end
 
   def init(spec)
-    repl(":load #{spec}\n")
+    run_command_and_wait_for_result(":load #{spec}\n")
   end
 
   def exit
@@ -53,21 +54,20 @@ class ::Guard::Haskell::Repl
     ::Thread.kill(listener)
   end
 
-  def run(pattern = nil)
-    if pattern.nil?
-      repl(":reload\n:main --color\n")
-    else
-      repl(":reload\n:main --color --match #{pattern}\n")
+  def reload_and_run_matching(pattern = nil)
+    if run_command_and_wait_for_result(":reload\n")
+      if pattern.nil?
+        run_command_and_wait_for_result(":main --color\n")
+      else
+        run_command_and_wait_for_result(":main --color --match #{pattern}\n")
+      end
     end
   end
 
-  def rerun
-    repl(":reload\n:main --color --rerun\n")
-  end
-
-  def result
-    while @running do sleep(0.01) end
-    @result
+  def reload_and_rerun
+    if run_command_and_wait_for_result(":reload\n")
+      run_command_and_wait_for_result(":main --color --rerun\n")
+    end
   end
 
   class Sandbox
@@ -91,7 +91,17 @@ class ::Guard::Haskell::Repl
   end
 
   private
-    def repl(command)
+    def run_command_and_wait_for_result(command)
+      talk_to_repl(command)
+      wait_for_result == :success
+    end
+
+    def wait_for_result
+      while @running do sleep(0.01) end
+      @result
+    end
+
+    def talk_to_repl(command)
       @running = true
       stdin.write(command)
     end

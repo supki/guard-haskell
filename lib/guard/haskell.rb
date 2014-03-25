@@ -71,15 +71,15 @@ module ::Guard
     end
 
     def run_all
-      repl.run
+      repl.reload_and_run_matching
       success?
     end
 
     def run pattern
       if opts.focus_on_fail and last_run == :runtime_failure
-        repl.rerun
+        repl.reload_and_rerun
       else
-        repl.run(pattern)
+        repl.reload_and_run_matching(pattern)
       end
       success?
     end
