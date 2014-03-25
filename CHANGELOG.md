@@ -2,6 +2,7 @@
 =====
 
   * Add `sandbox_glob` option
+  * Separate stages for [re]loading and rerunning specs
 
 1.4.0
 =====
