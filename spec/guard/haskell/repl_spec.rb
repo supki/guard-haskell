@@ -143,6 +143,17 @@ describe ::Guard::Haskell::Repl do
         expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
       end
 
+      # This one's even trickier to reproduce than the previous one
+      it 'handles "cannot find object file" runtime linker error' do
+        in_stream  = ::File.open(run_file["runtime-linker-cannot-find-object-file.error"])
+        repl.instance_variable_set(:@running, true)
+
+        repl.send(:listen, in_stream, dev_null)
+
+        expect(repl.instance_variable_get(:@running)).to eq(false)
+        expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
+      end
+
       it "handles hspec exceptions" do
         in_stream  = ::File.open(run_file["hspec-exception.error"])
         repl.instance_variable_set(:@running, true)

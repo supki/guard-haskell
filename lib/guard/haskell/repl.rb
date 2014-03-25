@@ -17,6 +17,7 @@ class ::Guard::Haskell::Repl
       :runtime_failure
     when /Failed, modules loaded:/,
          /\*{3} Exception:/,
+         /cannot find object file for module/,
          /phase `C pre-processor' failed/,
          /GHCi runtime linker: fatal error:/,
          /During interactive linking, GHCi couldn't find the following symbol:/
