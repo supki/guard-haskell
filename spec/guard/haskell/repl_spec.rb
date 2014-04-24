@@ -173,6 +173,16 @@ describe ::Guard::Haskell::Repl do
         expect(repl.instance_variable_get(:@running)).to eq(false)
         expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
       end
+
+      it "handles preprocessor phase failures" do
+        in_stream  = ::File.open(run_file["preprocessor-phase-failed.error"])
+        repl.instance_variable_set(:@running, true)
+
+        repl.send(:listen, in_stream, dev_null)
+
+        expect(repl.instance_variable_get(:@running)).to eq(false)
+        expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
+      end
     end
   end
 

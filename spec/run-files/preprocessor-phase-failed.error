@@ -1,0 +1,5 @@
+*Main> hspec-discover: unexpected argument `o'
+
+Usage: hspec-discover SRC CUR DST [--formatter=FORMATTER] [--no-main]
+
+phase `Haskell pre-processor' failed (exitcode = 1)

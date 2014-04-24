@@ -1,3 +1,8 @@
+1.6.0
+=====
+
+  * Handle Haskell pre-processor phase failures
+
 1.5.0
 =====
 
@@ -13,7 +18,7 @@
 =====
 
   * Ignore user cabal package database if sandbox is found
-  * Catch CPP failures (previously did n't work because of the typo)
+  * Catch CPP failures (previously didn't work because of the typo)
   * Add `focus_on_fail` option
 
 1.2.0
