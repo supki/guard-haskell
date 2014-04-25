@@ -33,12 +33,16 @@ describe "monkey patching" do
   end
 end
 
+class ::Guard::Haskell::Repl
+  def initialize(*args)
+  end
+end
+
 describe ::Guard::Haskell do
   let(:guard) { ::Guard::Haskell.new }
 
   before :each do
     ::Guard.stub(:add_group)
-    ::Guard::Haskell::Repl.any_instance.stub(:start)
     ::Guard::Haskell::Repl.any_instance.stub(:init)
   end
 
@@ -127,10 +131,10 @@ describe ::Guard::Haskell do
     it "reruns failing examples if last run was a runtime failure and @focus_on_fail is set" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_rerun)
       expect_any_instance_of(::Guard::Haskell::Repl).not_to receive(:reload_and_run_matching).with("Foo")
-      guard.instance_variable_set(:@last_run, :runtime_failure)
-      guard.opts.focus_on_fail = true
 
+      guard.opts.focus_on_fail = true
       guard.start
+      guard.instance_variable_set(:@last_run, :runtime_failure)
       guard.run("Foo")
     end
 
@@ -149,7 +153,6 @@ describe ::Guard::Haskell do
     it "checks success after run" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching)
       expect(guard).to receive(:success?)
-      guard.instance_variable_set(:@last_run, :success)
 
       guard.start
       guard.run_all
@@ -161,9 +164,9 @@ describe ::Guard::Haskell do
       ::Guard::Haskell::Repl.any_instance.stub(:result) { received }
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
       yield
-      guard.instance_variable_set(:@last_run, before)
 
       guard.start
+      guard.instance_variable_set(:@last_run, before)
       guard.success?
       expect(guard.instance_variable_get(:@last_run)).to eq(after)
     end
@@ -224,33 +227,30 @@ describe ::Guard::Haskell do
 
     it "does not run all specs on success after failure by default" do
       ::Guard::Haskell::Repl.any_instance.stub(:success?) { true }
-      guard.instance_variable_set(:@last_run, :failure)
-
       expect(guard).not_to receive(:run_all)
 
       guard.start
+      guard.instance_variable_set(:@last_run, :failure)
       guard.success?
     end
 
     it "runs all examples on success after runtime failure with :all_on_pass option" do
       ::Guard::Haskell::Repl.any_instance.stub(:result) { :success }
       custom_guard = ::Guard::Haskell.new(all_on_pass: true)
-      custom_guard.instance_variable_set(:@last_run, :runtime_failure)
-
       expect(custom_guard).to receive(:run_all)
 
       custom_guard.start
+      custom_guard.instance_variable_set(:@last_run, :runtime_failure)
       custom_guard.success?
     end
 
     it "runs all examples on success after compile time failure with :all_on_pass option" do
       ::Guard::Haskell::Repl.any_instance.stub(:result) { :success }
       custom_guard = ::Guard::Haskell.new(all_on_pass: true)
-      custom_guard.instance_variable_set(:@last_run, :compile_failure)
-
       expect(custom_guard).to receive(:run_all)
 
       custom_guard.start
+      custom_guard.instance_variable_set(:@last_run, :compile_failure)
       custom_guard.success?
     end
   end

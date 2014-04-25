@@ -3,11 +3,6 @@ require 'open3'
 class ::Guard::Haskell::Repl
   attr_reader :stdin, :listener, :thread, :result
 
-  def initialize
-    @running = false
-    @result  = :success
-  end
-
   def self.test(str)
     case str
     when /\d+ examples?, 0 failures/,
@@ -26,7 +21,10 @@ class ::Guard::Haskell::Repl
     end
   end
 
-  def start(ghci_options, sandbox_glob)
+  def initialize(ghci_options, sandbox_glob)
+    @running = false
+    @result  = :success
+
     cmd = ["ghci"]
 
     Dir["*"].each { |d| cmd << "-i#{d}" if File.directory?(d) }

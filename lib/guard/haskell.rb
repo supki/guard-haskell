@@ -22,7 +22,8 @@ module ::Guard
 
     require 'guard/haskell/repl'
 
-    attr_reader :repl, :targets, :last_run, :opts
+    attr_accessor :opts, :repl
+    attr_reader :targets, :last_run
 
     Options = Struct.new(
       :top_spec,
@@ -44,14 +45,12 @@ module ::Guard
 
     def initialize(user_options = {})
       super
-
-      @last_run = :success # try to prove it wasn't :-)
-      @opts     = Options.new(*DEFAULT_OPTIONS.merge(user_options).values)
-      @repl     = Repl.new
+      self.opts = Options.new(*DEFAULT_OPTIONS.merge(user_options).values)
     end
 
     def start
-      repl.start(opts.ghci_options, opts.sandbox_glob)
+      @last_run = :success # try to prove it wasn't :-)
+      self.repl = Repl.new(opts.ghci_options, opts.sandbox_glob)
       repl.init(opts.top_spec)
 
       @targets = ::Set.new(::Dir.glob("**/*.{hs,lhs}"))
