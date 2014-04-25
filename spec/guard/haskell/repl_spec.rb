@@ -95,6 +95,10 @@ describe ::Guard::Haskell::Repl do
       expect(::Guard::Haskell::Repl.test("phase `C pre-processor' failed")).to eq(:compile_failure)
     end
 
+    it "handles Haskell pre-processor errors" do
+      expect(::Guard::Haskell::Repl.test("phase `Haskell pre-processor' failed")).to eq(:compile_failure)
+    end
+
     it "handles runtime linker errors" do
       expect(::Guard::Haskell::Repl.test("GHCi runtime linker: fatal error:")).to eq(:compile_failure)
     end
