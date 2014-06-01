@@ -1,0 +1,9 @@
+Cabal sandboxes found:
+  .cabal-sandbox/x86_64-linux-ghc-7.6.3-packages.conf.d
+Cabal sandbox used:
+  .cabal-sandbox/x86_64-linux-ghc-7.6.3-packages.conf.d
+GHCi, version 7.6.3: http://www.haskell.org/ghc/  :? for help
+Loading package ghc-prim ... linking ... done.
+Loading package integer-gmp ... linking ... done.
+Loading package base ... linking ... done.
+ghc: could not execute: hspec-disco

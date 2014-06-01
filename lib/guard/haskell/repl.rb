@@ -16,7 +16,8 @@ class ::Guard::Haskell::Repl
          /phase `C pre-processor' failed/,
          /phase `Haskell pre-processor' failed/,
          /GHCi runtime linker: fatal error:/,
-         /During interactive linking, GHCi couldn't find the following symbol:/
+         /During interactive linking, GHCi couldn't find the following symbol:/,
+         /ghc: could not execute:/
       :compile_failure
     end
   end
