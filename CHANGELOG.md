@@ -3,6 +3,10 @@
 
   * Handle Haskell pre-processor phase failures
 
+  * Handle missing Haskell pre-processor failures
+
+  * More extensible Guardfile template
+
 1.5.0
 =====
 
