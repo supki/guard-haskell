@@ -26,6 +26,10 @@ end
 class ::Guard::Haskell::Repl
   def initialize(*args)
   end
+
+  def result
+    :success
+  end
 end
 
 describe ::Guard::Haskell do
@@ -46,7 +50,7 @@ describe ::Guard::Haskell do
 
   describe "#start" do
     it "starts repl" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:init).with("test/Spec.hs")
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:initialize).with("spec", [])
 
       guard.start
     end
@@ -67,10 +71,18 @@ describe ::Guard::Haskell do
       custom_guard.start
     end
 
-    it "starts repl with custom spec specified with :top_spec option" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:init).with("test/CustomSpec.hs")
+    it "starts repl with custom target specified with :test_suite option" do
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:initialize).with("not-spec", [])
 
-      custom_guard = ::Guard::Haskell.new(top_spec: "test/CustomSpec.hs")
+      custom_guard = ::Guard::Haskell.new(test_suite: "not-spec")
+      custom_guard.start
+    end
+
+    it "starts repl with custom options specified with :repl_options option" do
+      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:initialize)
+        .with("spec", ["--ghc-options=-Werror"])
+
+      custom_guard = ::Guard::Haskell.new(repl_options: ["--ghc-options=-Werror"])
       custom_guard.start
     end
   end
@@ -151,11 +163,11 @@ describe ::Guard::Haskell do
 
   describe "#success" do
     def notify(before, received, after)
+      guard.start
       ::Guard::Haskell::Repl.any_instance.stub(:result) { received }
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
       yield
 
-      guard.start
       guard.instance_variable_set(:@last_run, before)
       guard.success?
       expect(guard.instance_variable_get(:@last_run)).to eq(after)
@@ -245,25 +257,11 @@ describe ::Guard::Haskell do
     end
   end
 
-  describe "#run_on_additions" do
-    it "reinitializes the repl on new files" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:init).twice
-
-      guard.start
-      guard.instance_variable_set(:@targets, [])
-      guard.run_on_additions ["foo", "bar"]
-    end
-
-    it "does not reinitialize the repl if new files were seen before" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:init).once
-
-      guard.start
-      guard.instance_variable_set(:@targets, ["foo", "bar"])
-      guard.run_on_additions ["foo", "bar"]
-    end
-  end
-
   describe "#run_on_modifications" do
+    before :each do
+      ::Guard::Haskell::Repl.any_instance.stub(:result) { :success }
+    end
+
     it "run examples for simple haskell files" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with("Foo")
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:result)
@@ -310,6 +308,24 @@ describe ::Guard::Haskell do
 
       guard.start
       guard.run_on_modifications(["foo/Bar/BazSpec.hs"])
+    end
+  end
+
+  describe "#run_on_additions" do
+    it "reinitializes the repl on new files" do
+      expect_any_instance_of(::Guard::Haskell).to receive(:reload).once
+
+      guard.start
+      guard.instance_variable_set(:@targets, [])
+      guard.run_on_additions(["foo", "bar"])
+    end
+
+    it "does not reinitialize the repl if new files were seen before" do
+      expect_any_instance_of(::Guard::Haskell).not_to receive(:reload).once
+
+      guard.start
+      guard.instance_variable_set(:@targets, ["foo", "bar"])
+      guard.run_on_additions(["foo", "bar"])
     end
   end
 end

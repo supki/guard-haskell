@@ -20,39 +20,26 @@ class ::Guard::Haskell::Repl
          /During interactive linking, GHCi couldn't find the following symbol:/,
          /ghc: could not execute:/
       :compile_failure
+    when /^cabal:/
+      :loading_failure
     end
   end
 
-  def initialize(ghci_options, sandbox_glob)
+  def initialize(test_suite, repl_options)
     @running = false
     @result  = :success
+    start("cabal", "repl", test_suite, *repl_options)
+  end
 
-    cmd = ["ghci"]
-
-    Dir["*"].each { |d| cmd << "-i#{d}" if File.directory?(d) }
-    lookup_sandbox(cmd, sandbox_glob)
-    cmd.concat(ghci_options)
-
+  def start(*cmd)
+    @running = true
     @stdin, stdout, @thread = ::Open3.popen2e(*cmd)
     @listener = ::Thread.new { listen(stdout, STDOUT) }
-  end
-
-  def lookup_sandbox(cmd, sandbox_glob)
-    sandboxes = Sandbox.new(sandbox_glob)
-    sandboxes.with_best_sandbox(->(str) { str.scan(/\d+/).map(&:to_i) }) do |best_sandbox|
-      puts "Cabal sandboxes found:"
-      sandboxes.each { |sandbox| puts "  #{sandbox}" }
-      puts "Cabal sandbox used:\n  #{best_sandbox}"
-      cmd.concat(["-no-user-package-db", "-package-db=#{best_sandbox}"])
-    end
-  end
-
-  def init(spec)
-    run_command_and_wait_for_result(":load #{spec}\n")
+    wait_for_result
   end
 
   def exit
-    ::Process::kill("TERM", thread.pid)
+    stdin.write(":quit\n")
     ::Thread.kill(listener)
   end
 
@@ -69,26 +56,6 @@ class ::Guard::Haskell::Repl
   def reload_and_rerun
     if run_command_and_wait_for_result(":reload\n")
       run_command_and_wait_for_result(":main --color --rerun\n")
-    end
-  end
-
-  class Sandbox
-    attr_reader :sandboxes
-
-    include ::Enumerable
-
-    def initialize(glob)
-      @sandboxes = ::Dir[glob]
-    end
-
-    def each(&block)
-      sandboxes.each(&block)
-    end
-
-    def with_best_sandbox(ordering)
-      best = sandboxes.max_by(&ordering)
-      yield best if best
-      best
     end
   end
 
@@ -114,7 +81,7 @@ class ::Guard::Haskell::Repl
         if @running
           res = self.class.test(str)
           case res
-          when :success, :runtime_failure, :compile_failure
+          when :success, :runtime_failure, :compile_failure, :loading_failure
             @result  = res
             @running = false
           end

@@ -7,43 +7,40 @@ guard-haskell
 
 `Guard::Haskell` automatically runs your specs
 
-# Install
+Install
+-------
 
 ```shell
 % cabal install hspec
 % gem install guard-haskell
 ```
 
-# Usage
+Usage
+-----
 
-## How does it work?
+### How does it work?
 
 For explanation what `guard` is and how to use it, please refer to the [`guard manual`][0]
 
-`guard-haskell` uses [`hspec`][1] to run specs and check results, so it makes some assumptions about your code style:
+`guard-haskell` uses [`hspec`][1] to run specs and check results, so it makes
+some assumptions about your code organization and style:
 
-  * `hspec` is your testing framework and
+  * `hspec` is your testing framework of choice; therefore,
 
-  * [`hspec-discover`][2] (or similar tool) organizes your specs,
-  i.e. there is a "top" spec (usually `test/Spec.hs`) that pulls others in
+  * [`hspec-discover`][2] organizes your specs
 
-When you type in `guard`, `guard-haskell` fires up an `ghci` instance which it talks to, reloading
-and rerunning (parts of) "top" spec on files modifications.
+When you type `guard` in the terminal, `guard-haskell` fires up a `cabal repl` instance
+to talk to, running (parts of) examples when files are modified.
 
-## Guard::Haskell setup
+### Guard::Haskell setup
 
-For `guard-haskell` to be ready to work we need a top level spec file and a Guardfile:
+For `guard-haskell` to be ready to work we need a test suite named "spec" (that's
+configurable, any test suite name will do) defined in the cabal file and a Guardfile
+(which you can get by running `guard init haskell`)
 
-```shell
-mkdir --parents test
-echo '{-# OPTIONS_GHC -F -pgmF hspec-discover #-}' > test/Spec.hs
-guard init haskell
-guard
-```
+### Guardfile examples
 
-## Guardfile examples
-
-Typical haskell project:
+A typical haskell project:
 
 ```ruby
 guard :haskell do
@@ -52,17 +49,30 @@ guard :haskell do
 end
 ```
 
-Customized haskell project:
+A customized haskell project:
 
 ```ruby
-guard :haskell, all_on_pass: true, ghci_options: ["-DTEST"] do
+options = ["--ghc-options=-ignore-dot-ghci -DTEST"]
+
+guard :haskell, all_on_start: true, repl_options: options do
   watch(%r{test/.+Spec\.l?hs$})
   watch(%r{lib/.+\.l?hs$})
   watch(%r{bin/.+\.l?hs$})
 end
 ```
 
-## Options
+Another customized haskell project:
+
+```ruby
+guard :haskell, all_on_start: true, all_on_pass: true, test_suite: "not-spec" do
+  watch(%r{test/.+Spec\.l?hs$})
+  watch(%r{lib/.+\.l?hs$})
+  watch(%r{bin/.+\.l?hs$})
+end
+```
+
+Options
+-------
 
 `Guard::Haskell` has a bunch of options:
 
@@ -72,25 +82,22 @@ Run all examples on start (default: `false`).
 
 ### `all_on_pass`
 
-Run all examples after previously failing spec _finally_ passes (default: `false`).
+Run all examples when a failed spec passes again (default: `false`).
 
 ### `focus_on_fail`
 
 Rerun only failed examples until they pass (default: `true`).
 
-### `ghci_options`
+### `repl_options`
 
-Pass custom ghci options, for example, `-XCPP` directives like `-DTEST` (default: `[]`).
+Pass custom cabal repl options (default: `[]`).
 
-### `top_spec`
+### `test_suite`
 
-"Top" spec location (default: `test/Spec.hs`).
+The test-suite to load (default: `spec`).
 
-### `sandbox_glob`
-
-A glob that matches cabal sandboxes (default: `.cabal-sandbox/*packages.conf.d`)
-
-## Known problems
+Known problems
+--------------
 
 ### App you test uses the GHC API
 

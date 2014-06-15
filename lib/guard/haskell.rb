@@ -16,22 +16,20 @@ module ::Guard
     attr_accessor :opts, :repl
     attr_reader :targets, :last_run
 
-    Options = Struct.new(
-      :top_spec,
-      :ghci_options,
+    Options = ::Struct.new(
+      :test_suite,
+      :repl_options,
       :all_on_start,
       :all_on_pass,
       :focus_on_fail,
-      :sandbox_glob,
     )
 
     DEFAULT_OPTIONS = {
-      top_spec:      "test/Spec.hs",
-      ghci_options:  [],
+      test_suite:    "spec",
+      repl_options:  [],
       all_on_start:  false,
       all_on_pass:   false,
       focus_on_fail: true,
-      sandbox_glob: ".cabal-sandbox/*packages.conf.d",
     }
 
     def initialize(user_options = {})
@@ -41,8 +39,8 @@ module ::Guard
 
     def start
       @last_run = :success # try to prove it wasn't :-)
-      self.repl = Repl.new(opts.ghci_options, opts.sandbox_glob)
-      repl.init(opts.top_spec)
+      self.repl = Repl.new(opts.test_suite, opts.repl_options)
+      throw :cabal_repl_initialization_has_failed if self.repl.result != :success
 
       @targets = ::Set.new(::Dir.glob("**/*.{hs,lhs}"))
 
@@ -65,7 +63,7 @@ module ::Guard
       success?
     end
 
-    def run pattern
+    def run(pattern)
       if opts.focus_on_fail and last_run == :runtime_failure
         repl.reload_and_rerun
       else
@@ -99,14 +97,14 @@ module ::Guard
       end
     end
 
-    def run_on_additions paths
-      unless paths.all? { |path| targets.include? path }
+    def run_on_additions(paths)
+      unless paths.all? { |path| targets.include?(path) }
         @targets += paths
-        repl.init(opts.top_spec)
+        reload
       end
     end
 
-    def run_on_modifications paths
+    def run_on_modifications(paths)
       case paths.first
       when /(.+)Spec\.l?hs$/, /(.+)\.l?hs$/
         run($1.to_module_name)
