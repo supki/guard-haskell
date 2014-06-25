@@ -3,17 +3,8 @@ require 'guard/plugin'
 require 'set'
 
 class ::String
-  def strip_lowercase_directories
-    matches = self.match(/^\p{Lower}[^\/]+\/(.+)/)
-    if matches
-      matches[1].strip_lowercase_directories
-    else
-      self
-    end
-  end
-
-  def path_to_module_name
-    self.gsub(/\//, ".")
+  def to_module_name
+    self.split('/').drop_while{|x| /^[[:lower:]]/.match(x)}.join('.')
   end
 end
 
@@ -118,7 +109,7 @@ module ::Guard
     def run_on_modifications paths
       case paths.first
       when /(.+)Spec\.l?hs$/, /(.+)\.l?hs$/
-        run($1.strip_lowercase_directories.path_to_module_name)
+        run($1.to_module_name)
       end
     end
   end

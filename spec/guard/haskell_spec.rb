@@ -3,31 +3,21 @@ require 'guard/notifier'
 
 describe "monkey patching" do
   describe ::String do
-    describe "#strip_lowercase_directories" do
-      it "works on empty string" do
-        expect("".strip_lowercase_directories).to eq("")
+    describe "#to_module_name" do
+      it "converts the empty string to the empty module name" do
+        expect("".to_module_name).to eq("")
       end
 
-      it "works on string without lowercase directory prefixes" do
-        expect("Foo".strip_lowercase_directories).to eq("Foo")
+      it "is identity for very simple module paths" do
+        expect("Foo".to_module_name).to eq("Foo")
       end
 
-      it "works on string with lowercase directory prefix" do
-        expect("foo/Bar".strip_lowercase_directories).to eq("Bar")
+      it "drops lowercase directory prefixes and substitutes / with ." do
+        expect("foo/bar/Qux/Quux".to_module_name).to eq("Qux.Quux")
       end
 
-      it "works on string with multiple lowercase directory prefixes" do
-        expect("foo/bar/Baz".strip_lowercase_directories).to eq("Baz")
-      end
-    end
-
-    describe "#path_to_module_name" do
-      it "works on string without path separators" do
-        expect("Foo".path_to_module_name).to eq("Foo")
-      end
-
-      it "works on string with path separators" do
-        expect("Foo/Bar/Baz".path_to_module_name).to eq("Foo.Bar.Baz")
+      it "does not deal with extensions in the path" do
+        expect("foo/bar/Qux/Quux.hs".to_module_name).to eq("Qux.Quux.hs")
       end
     end
   end
