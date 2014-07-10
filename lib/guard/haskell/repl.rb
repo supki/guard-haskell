@@ -15,6 +15,7 @@ class ::Guard::Haskell::Repl
          /cannot find object file for module/,
          /phase `C pre-processor' failed/,
          /phase `Haskell pre-processor' failed/,
+         /phase `Linker' failed/,
          /GHCi runtime linker: fatal error:/,
          /During interactive linking, GHCi couldn't find the following symbol:/,
          /ghc: could not execute:/

@@ -1,0 +1,4 @@
+*Main> /usr/bin/ld: dist/build/spec/spec-tmp/Paths_X.o: relocation R_X86_64_32S against `stg_bh_upd_frame_info' can not be used when making a shared object; recompile with -fPIC
+dist/build/spec/spec-tmp/Paths_X.o: could not read symbols: Bad value
+collect2: error: ld returned 1 exit status
+phase `Linker' failed (exitcode = 1)
