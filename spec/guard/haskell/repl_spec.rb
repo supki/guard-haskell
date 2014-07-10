@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'guard/notifier'
 
 dev_null = ::File.open("/dev/null", "w")
-run_file = ->(file) { "spec/run-files/#{file}" }
+asset = ->(file) { "asset/#{file}" }
 
 describe ::Guard::Haskell::Repl do
   let(:repl) do
@@ -107,7 +107,7 @@ describe ::Guard::Haskell::Repl do
   describe '#listen' do
     context 'real world' do
       it "handles typical pass run" do
-        in_stream  = ::File.open(run_file["spec-pass.success"])
+        in_stream  = ::File.open(asset["passed/spec-pass.ok"])
         repl.instance_variable_set(:@running, true)
 
         repl.send(:listen, in_stream, dev_null)
@@ -117,7 +117,7 @@ describe ::Guard::Haskell::Repl do
       end
 
       it "handles typical failure run" do
-        in_stream  = ::File.open(run_file["spec-failure.error"])
+        in_stream  = ::File.open(asset["failed/spec-failure.err"])
         repl.instance_variable_set(:@running, true)
 
         repl.send(:listen, in_stream, dev_null)
@@ -127,7 +127,7 @@ describe ::Guard::Haskell::Repl do
       end
 
       it 'handles "duplicate definition" runtime linker error' do
-        in_stream  = ::File.open(run_file["runtime-linker-duplicate-definition-for-symbol.error"])
+        in_stream  = ::File.open(asset["failed/runtime-linker-duplicate-definition-for-symbol.err"])
         repl.instance_variable_set(:@running, true)
 
         repl.send(:listen, in_stream, dev_null)
@@ -138,7 +138,7 @@ describe ::Guard::Haskell::Repl do
 
       # Unfortunately I can't remember why it happened :-(
       it 'handles "couldn\'t find symbol" runtime linker error' do
-        in_stream  = ::File.open(run_file["runtime-linker-couldn't-find-symbol.error"])
+        in_stream  = ::File.open(asset["failed/runtime-linker-couldn't-find-symbol.err"])
         repl.instance_variable_set(:@running, true)
 
         repl.send(:listen, in_stream, dev_null)
@@ -149,7 +149,7 @@ describe ::Guard::Haskell::Repl do
 
       # This one's even trickier to reproduce than the previous one
       it 'handles "cannot find object file" runtime linker error' do
-        in_stream  = ::File.open(run_file["runtime-linker-cannot-find-object-file.error"])
+        in_stream  = ::File.open(asset["failed/runtime-linker-cannot-find-object-file.err"])
         repl.instance_variable_set(:@running, true)
 
         repl.send(:listen, in_stream, dev_null)
@@ -159,7 +159,7 @@ describe ::Guard::Haskell::Repl do
       end
 
       it "handles hspec exceptions" do
-        in_stream  = ::File.open(run_file["hspec-exception.error"])
+        in_stream  = ::File.open(asset["failed/exception.err"])
         repl.instance_variable_set(:@running, true)
 
         repl.send(:listen, in_stream, dev_null)
@@ -169,7 +169,7 @@ describe ::Guard::Haskell::Repl do
       end
 
       it "handles CPP exceptions" do
-        in_stream  = ::File.open(run_file["cpp-exception.error"])
+        in_stream  = ::File.open(asset["failed/phase-c-pre-processor-failed.err"])
         repl.instance_variable_set(:@running, true)
 
         repl.send(:listen, in_stream, dev_null)
@@ -179,7 +179,7 @@ describe ::Guard::Haskell::Repl do
       end
 
       it "handles preprocessor phase failures" do
-        in_stream  = ::File.open(run_file["preprocessor-phase-failed.error"])
+        in_stream  = ::File.open(asset["failed/phase-haskell-pre-processor-failed.err"])
         repl.instance_variable_set(:@running, true)
 
         repl.send(:listen, in_stream, dev_null)
@@ -189,7 +189,7 @@ describe ::Guard::Haskell::Repl do
       end
 
       it "handles missing preprocessor error" do
-        in_stream  = ::File.open(run_file["missing-preprocessor.error"])
+        in_stream  = ::File.open(asset["failed/invalid-preprocessor.err"])
         repl.instance_variable_set(:@running, true)
 
         repl.send(:listen, in_stream, dev_null)
@@ -199,7 +199,7 @@ describe ::Guard::Haskell::Repl do
       end
 
       it "handles linker phase failures" do
-        in_stream  = ::File.open(run_file["phase-linker-failed.err"])
+        in_stream  = ::File.open(asset["failed/phase-linker-failed.err"])
         repl.instance_variable_set(:@running, true)
 
         repl.send(:listen, in_stream, dev_null)
