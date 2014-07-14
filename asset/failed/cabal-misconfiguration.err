@@ -1,0 +1,2 @@
+cabal: Cannot build the test suite 'spec' because test suites are not enabled.
+Run configure with the flag --enable-tests
