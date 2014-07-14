@@ -64,7 +64,7 @@ end
 Another customized haskell project:
 
 ```ruby
-guard :haskell, all_on_start: true, all_on_pass: true, test_suite: "not-spec" do
+guard :haskell, all_on_start: true, all_on_pass: true, cabal_target: "not-spec" do
   watch(%r{test/.+Spec\.l?hs$})
   watch(%r{lib/.+\.l?hs$})
   watch(%r{bin/.+\.l?hs$})
@@ -92,9 +92,9 @@ Rerun only failed examples until they pass (default: `true`).
 
 Pass custom cabal repl options (default: `[]`).
 
-### `test_suite`
+### `cabal_target`
 
-The test-suite to load (default: `spec`).
+The cabal build target to load (default: `spec`).
 
 Known problems
 --------------

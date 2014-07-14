@@ -50,45 +50,45 @@ describe ::Guard::Haskell::Repl do
     end
   end
 
-  describe '#test' do
+  describe '#finished_with' do
     it "handles zero examples/failures" do
-      expect(::Guard::Haskell::Repl.test("0 examples, 0 failures")).to eq(:success)
+      expect(::Guard::Haskell::Repl.finished_with("0 examples, 0 failures")).to eq(:success)
     end
 
     it "handles one example/zero failures" do
-      expect(::Guard::Haskell::Repl.test("1 example, 0 failures")).to eq(:success)
+      expect(::Guard::Haskell::Repl.finished_with("1 example, 0 failures")).to eq(:success)
     end
 
     it "handles multiple examples/zero failures" do
-      expect(::Guard::Haskell::Repl.test("37 examples, 0 failures")).to eq(:success)
+      expect(::Guard::Haskell::Repl.finished_with("37 examples, 0 failures")).to eq(:success)
     end
 
     it "handles one example/failure" do
-      expect(::Guard::Haskell::Repl.test("1 example, 1 failure")).to eq(:runtime_failure)
+      expect(::Guard::Haskell::Repl.finished_with("1 example, 1 failure")).to eq(:runtime_failure)
     end
 
     it "handles multiple examples/multiple failures" do
-      expect(::Guard::Haskell::Repl.test("26 examples, 2 failures")).to eq(:runtime_failure)
+      expect(::Guard::Haskell::Repl.finished_with("26 examples, 2 failures")).to eq(:runtime_failure)
     end
 
     it "handles failure to load the module" do
-      expect(::Guard::Haskell::Repl.test("Failed, modules loaded:")).to eq(:compile_failure)
+      expect(::Guard::Haskell::Repl.finished_with("Failed, modules loaded:")).to eq(:compile_failure)
     end
 
     it "handles uncaught exceptions" do
-      expect(::Guard::Haskell::Repl.test("*** Exception: Prelude.undefined")).to eq(:compile_failure)
+      expect(::Guard::Haskell::Repl.finished_with("*** Exception: Prelude.undefined")).to eq(:compile_failure)
     end
 
     it "handles CPP errors" do
-      expect(::Guard::Haskell::Repl.test("phase `C pre-processor' failed")).to eq(:compile_failure)
+      expect(::Guard::Haskell::Repl.finished_with("phase `C pre-processor' failed")).to eq(:compile_failure)
     end
 
     it "handles Haskell pre-processor errors" do
-      expect(::Guard::Haskell::Repl.test("phase `Haskell pre-processor' failed")).to eq(:compile_failure)
+      expect(::Guard::Haskell::Repl.finished_with("phase `Haskell pre-processor' failed")).to eq(:compile_failure)
     end
 
     it "handles runtime linker errors" do
-      expect(::Guard::Haskell::Repl.test("GHCi runtime linker: fatal error:")).to eq(:compile_failure)
+      expect(::Guard::Haskell::Repl.finished_with("GHCi runtime linker: fatal error:")).to eq(:compile_failure)
     end
   end
 
@@ -96,134 +96,134 @@ describe ::Guard::Haskell::Repl do
     context 'real world' do
       it "handles typical pass run" do
         in_stream  = ::File.open(asset["passed/spec-pass.ok"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:success)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:success)
       end
 
       it "handles typical failure run" do
         in_stream  = ::File.open(asset["failed/spec-failure.err"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:runtime_failure)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:runtime_failure)
       end
 
       it 'handles "duplicate definition" runtime linker error' do
         in_stream  = ::File.open(asset["failed/runtime-linker-duplicate-definition-for-symbol.err"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:compile_failure)
       end
 
       # Unfortunately I can't remember why it happened :-(
       it 'handles "couldn\'t find symbol" runtime linker error' do
         in_stream  = ::File.open(asset["failed/runtime-linker-couldn't-find-symbol.err"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:compile_failure)
       end
 
       # This one's even trickier to reproduce than the previous one
       it 'handles "cannot find object file" runtime linker error' do
         in_stream  = ::File.open(asset["failed/runtime-linker-cannot-find-object-file.err"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:compile_failure)
       end
 
       it "handles hspec exceptions" do
         in_stream  = ::File.open(asset["failed/exception.err"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:compile_failure)
       end
 
       it "handles CPP exceptions" do
         in_stream  = ::File.open(asset["failed/phase-c-pre-processor-failed.err"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:compile_failure)
       end
 
       it "handles preprocessor phase failures" do
         in_stream  = ::File.open(asset["failed/phase-haskell-pre-processor-failed.err"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:compile_failure)
       end
 
       it "handles missing preprocessor error" do
         in_stream  = ::File.open(asset["failed/invalid-preprocessor.err"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:compile_failure)
       end
 
       it "handles linker phase failures" do
         in_stream  = ::File.open(asset["failed/phase-linker-failed.err"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:compile_failure)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:compile_failure)
       end
 
       it "handles cabal misconfiguration" do
         in_stream  = ::File.open(asset["failed/cabal-misconfiguration.err"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:loading_failure)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:loading_failure)
       end
 
       it "handles missing cabal target" do
         in_stream  = ::File.open(asset["failed/cabal-missing-target.err"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:loading_failure)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:loading_failure)
       end
 
       it "handles unrecognized cabal command" do
         in_stream  = ::File.open(asset["failed/cabal-unrecognized-command.err"])
-        repl.instance_variable_set(:@running, true)
+        repl.instance_variable_set(:@listening, true)
 
         repl.send(:listen, in_stream, dev_null)
 
-        expect(repl.instance_variable_get(:@running)).to eq(false)
-        expect(repl.instance_variable_get(:@result)).to eq(:loading_failure)
+        expect(repl.instance_variable_get(:@listening)).to eq(false)
+        expect(repl.instance_variable_get(:@status)).to eq(:loading_failure)
       end
     end
   end

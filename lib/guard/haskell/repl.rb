@@ -1,9 +1,9 @@
 require 'open3'
 
 class ::Guard::Haskell::Repl
-  attr_reader :stdin, :listener, :thread, :result
+  attr_reader :stdin, :listener, :inferior, :status
 
-  def self.test(str)
+  def self.finished_with(str)
     case str
     when /\d+ examples?, 0 failures/,
          /Ok, modules loaded:/
@@ -25,15 +25,15 @@ class ::Guard::Haskell::Repl
     end
   end
 
-  def initialize(test_suite, repl_options)
-    @running = false
-    @result  = :success
-    start("cabal", "repl", test_suite, *repl_options)
+  def initialize(cabal_target, repl_options)
+    @listening = false
+    @status = :success
+    start("cabal", "repl", cabal_target, *repl_options)
   end
 
   def start(*cmd)
-    @running = true
-    @stdin, stdout, @thread = ::Open3.popen2e(*cmd)
+    @listening = true
+    @stdin, stdout, @inferior = ::Open3.popen2e(*cmd)
     @listener = ::Thread.new { listen(stdout, STDOUT) }
     wait_for_result
   end
@@ -61,25 +61,21 @@ class ::Guard::Haskell::Repl
 
   private
     def run_command_and_wait_for_result(command)
-      talk_to_repl(command)
+      @listening = true
+      stdin.write(command)
       wait_for_result == :success
     end
 
     def wait_for_result
-      while @running do sleep(0.01) end
-      @result
-    end
-
-    def talk_to_repl(command)
-      @running = true
-      stdin.write(command)
+      while @listening do sleep(0.01) end
+      @status
     end
 
     def listen(in_stream, out_stream)
-      while (str = in_stream.gets)
-        out_stream.print(str)
-        if @running
-          res = self.class.test(str)
+      while (line = in_stream.gets)
+        out_stream.print(line)
+        if @listening
+          res = self.class.finished_with(line)
           case res
           when :success, :runtime_failure, :compile_failure, :loading_failure
             # A horrible hack to show the cursor again
@@ -87,8 +83,8 @@ class ::Guard::Haskell::Repl
             # The problem is that '\e[?25h' code from hspec is waiting on
             # the next line, which we probably will never read :-(
             out_stream.print("\e[?25h")
-            @result  = res
-            @running = false
+            @status = res
+            @listening = false
           end
         end
       end

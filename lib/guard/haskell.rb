@@ -17,7 +17,7 @@ module ::Guard
     attr_reader :targets, :last_run
 
     Options = ::Struct.new(
-      :test_suite,
+      :cabal_target,
       :repl_options,
       :all_on_start,
       :all_on_pass,
@@ -25,7 +25,7 @@ module ::Guard
     )
 
     DEFAULT_OPTIONS = {
-      test_suite:    "spec",
+      cabal_target:  "spec",
       repl_options:  [],
       all_on_start:  false,
       all_on_pass:   false,
@@ -39,8 +39,8 @@ module ::Guard
 
     def start
       @last_run = :success # try to prove it wasn't :-)
-      self.repl = Repl.new(opts.test_suite, opts.repl_options)
-      throw :cabal_repl_initialization_has_failed if self.repl.result != :success
+      self.repl = Repl.new(opts.cabal_target, opts.repl_options)
+      throw :cabal_repl_initialization_has_failed if self.repl.status != :success
 
       @targets = ::Set.new(::Dir.glob("**/*.{hs,lhs}"))
 
@@ -73,7 +73,7 @@ module ::Guard
     end
 
     def success?
-      case [last_run, repl.result]
+      case [last_run, repl.status]
       when [:runtime_failure, :success],
           [:compile_failure, :success]
         @last_run = :success
