@@ -82,6 +82,11 @@ class ::Guard::Haskell::Repl
           res = self.class.test(str)
           case res
           when :success, :runtime_failure, :compile_failure, :loading_failure
+            # A horrible hack to show the cursor again
+            #
+            # The problem is that '\e[?25h' code from hspec is waiting on
+            # the next line, which we probably will never read :-(
+            out_stream.print("\e[?25h")
             @result  = res
             @running = false
           end
