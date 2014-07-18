@@ -40,7 +40,8 @@ module ::Guard
     def start
       @last_run = :success # try to prove it wasn't :-)
       self.repl = Repl.new(opts.cabal_target, opts.repl_options)
-      throw :cabal_repl_initialization_has_failed if self.repl.status != :success
+      throw :cabal_repl_initialization_has_failed if self.repl.status == :loading_failure
+      success?
 
       @targets = ::Set.new(::Dir.glob("**/*.{hs,lhs}"))
 

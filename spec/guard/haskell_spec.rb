@@ -55,9 +55,14 @@ describe ::Guard::Haskell do
       guard.start
     end
 
+    it "checks the repl has been loaded successfully" do
+      expect(guard).to receive(:success?)
+
+      guard.start
+    end
+
     it "does not run all examples on start by default" do
       expect(guard).not_to receive(:run_all)
-      expect(guard).not_to receive(:success?)
 
       guard.start
     end
@@ -66,7 +71,7 @@ describe ::Guard::Haskell do
       custom_guard = ::Guard::Haskell.new(all_on_start: true)
 
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with(no_args)
-      expect(custom_guard).to receive(:success?)
+      expect(custom_guard).to receive(:success?).twice
 
       custom_guard.start
     end
@@ -107,10 +112,10 @@ describe ::Guard::Haskell do
   describe "#run" do
     it "checks success after run" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching).with("Foo")
-      expect(guard).to receive(:success?)
       guard.instance_variable_set(:@last_run, :success)
-
       guard.start
+
+      expect(guard).to receive(:success?)
       guard.run("Foo")
     end
 
@@ -154,9 +159,9 @@ describe ::Guard::Haskell do
   describe "#run_all" do
     it "checks success after run" do
       expect_any_instance_of(::Guard::Haskell::Repl).to receive(:reload_and_run_matching)
-      expect(guard).to receive(:success?)
-
       guard.start
+
+      expect(guard).to receive(:success?)
       guard.run_all
     end
   end
