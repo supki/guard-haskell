@@ -71,6 +71,17 @@ guard :haskell, all_on_start: true, all_on_pass: true, cabal_target: "not-spec" 
 end
 ```
 
+#### Gemfile
+
+It's also advised to have a trivial `Gemfile` in the repository for
+`bundler exec guard` to be able to pick the correct versions of the dependencies:
+
+```ruby
+source "https://rubygems.org"
+
+gem "guard-haskell", "~>2.0"
+```
+
 Options
 -------
 
