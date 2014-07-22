@@ -195,36 +195,6 @@ describe ::Guard::Haskell::Repl do
         expect(repl.instance_variable_get(:@listening)).to eq(false)
         expect(repl.instance_variable_get(:@status)).to eq(:compile_failure)
       end
-
-      it "handles cabal misconfiguration" do
-        in_stream  = ::File.open(asset["failed/cabal-misconfiguration.err"])
-        repl.instance_variable_set(:@listening, true)
-
-        repl.send(:listen, in_stream, dev_null)
-
-        expect(repl.instance_variable_get(:@listening)).to eq(false)
-        expect(repl.instance_variable_get(:@status)).to eq(:loading_failure)
-      end
-
-      it "handles missing cabal target" do
-        in_stream  = ::File.open(asset["failed/cabal-missing-target.err"])
-        repl.instance_variable_set(:@listening, true)
-
-        repl.send(:listen, in_stream, dev_null)
-
-        expect(repl.instance_variable_get(:@listening)).to eq(false)
-        expect(repl.instance_variable_get(:@status)).to eq(:loading_failure)
-      end
-
-      it "handles unrecognized cabal command" do
-        in_stream  = ::File.open(asset["failed/cabal-unrecognized-command.err"])
-        repl.instance_variable_set(:@listening, true)
-
-        repl.send(:listen, in_stream, dev_null)
-
-        expect(repl.instance_variable_get(:@listening)).to eq(false)
-        expect(repl.instance_variable_get(:@status)).to eq(:loading_failure)
-      end
     end
   end
 end

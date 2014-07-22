@@ -20,8 +20,6 @@ class ::Guard::Haskell::Repl
          /During interactive linking, GHCi couldn't find the following symbol:/,
          /ghc: could not execute:/
       :compile_failure
-    when /^cabal:/
-      :loading_failure
     end
   end
 
@@ -34,7 +32,7 @@ class ::Guard::Haskell::Repl
   def start(*cmd)
     @listening = true
     @stdin, stdout, @inferior = ::Open3.popen2e(*cmd)
-    @listener = ::Thread.new { listen(stdout, STDOUT) }
+    @listener = ::Thread.new { listen_or_die(stdout, STDOUT) }
     wait_for_result
   end
 
@@ -71,22 +69,31 @@ class ::Guard::Haskell::Repl
       @status
     end
 
+    def listen_or_die(in_stream, out_stream)
+      listen(in_stream, out_stream) # should never return
+      stop(:loading_failure)
+    end
+
     def listen(in_stream, out_stream)
       while (line = in_stream.gets)
         out_stream.print(line)
         if @listening
           res = self.class.finished_with(line)
           case res
-          when :success, :runtime_failure, :compile_failure, :loading_failure
+          when :success, :runtime_failure, :compile_failure
             # A horrible hack to show the cursor again
             #
             # The problem is that '\e[?25h' code from hspec is waiting on
             # the next line, which we probably will never read :-(
             out_stream.print("\e[?25h")
-            @status = res
-            @listening = false
+            stop(res)
           end
         end
       end
+    end
+
+    def stop(status)
+      @status = status
+      @listening = false
     end
 end
