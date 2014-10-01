@@ -107,8 +107,8 @@ module ::Guard
 
     def run_on_modifications(paths)
       case paths.first
-      when /(.+)Spec\.l?hs$/, /(.+)\.l?hs$/
-        run($1.to_module_name)
+      when /(.+)Spec\.l?hs$/, /(.+)\.l?hs$/ then run($1.to_module_name)
+      when /\.cabal$/ then reload
       end
     end
   end

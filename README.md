@@ -4,7 +4,6 @@ guard-haskell
 [![Build Status](https://secure.travis-ci.org/supki/guard-haskell.png?branch=master)](http://travis-ci.org/supki/guard-haskell)
 [![Dependencies Status](https://gemnasium.com/supki/guard-haskell.png)](https://gemnasium.com/supki/guard-haskell)
 
-
 `Guard::Haskell` automatically runs your specs
 
 Install
@@ -46,6 +45,7 @@ A typical haskell project:
 guard :haskell do
   watch(%r{test/.+Spec\.l?hs$})
   watch(%r{src/.+\.l?hs$})
+  watch(%r{\.cabal$})
 end
 ```
 
@@ -58,6 +58,7 @@ guard :haskell, all_on_start: true, repl_options: options do
   watch(%r{test/.+Spec\.l?hs$})
   watch(%r{lib/.+\.l?hs$})
   watch(%r{bin/.+\.l?hs$})
+  watch(%r{\.cabal$})
 end
 ```
 
@@ -68,6 +69,7 @@ guard :haskell, all_on_start: true, all_on_pass: true, cabal_target: "not-spec" 
   watch(%r{test/.+Spec\.l?hs$})
   watch(%r{lib/.+\.l?hs$})
   watch(%r{bin/.+\.l?hs$})
+  watch(%r{\.cabal$})
 end
 ```
 
@@ -79,7 +81,7 @@ It's also advised to have a trivial `Gemfile` in the repository for
 ```ruby
 source "https://rubygems.org"
 
-gem "guard-haskell", "~>2.0"
+gem "guard-haskell", "~>2.1"
 ```
 
 Options
