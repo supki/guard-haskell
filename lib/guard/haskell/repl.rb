@@ -1,6 +1,12 @@
 require 'open3'
 
 class ::Guard::Haskell::Repl
+  class NoCabalFile < ::StandardError
+    def initialize(msg = "No cabal file found. Please create a package description file <pkgname>.cabal")
+      super
+    end
+  end
+
   attr_reader :stdin, :listener, :inferior, :status
 
   def self.finished_with(str)
@@ -26,6 +32,7 @@ class ::Guard::Haskell::Repl
   def initialize(cabal_target, repl_options)
     @listening = false
     @status = :success
+    raise NoCabalFile if Dir.glob('*.cabal').empty?
     start("cabal", "repl", cabal_target, *repl_options)
   end
 

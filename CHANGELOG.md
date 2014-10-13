@@ -3,6 +3,8 @@
 
   * Reload the REPL on `.cabal` file modifications
 
+  * Refuse to load without a cabal file in the current directory
+
 2.0.0
 =====
 
