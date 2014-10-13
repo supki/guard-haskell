@@ -81,7 +81,7 @@ It's also advised to have a trivial `Gemfile` in the repository for
 ```ruby
 source "https://rubygems.org"
 
-gem "guard-haskell", "~>2.1"
+gem "guard-haskell", "~>2.0"
 ```
 
 Options

@@ -1,4 +1,4 @@
-2.1.0
+2.0.1
 =====
 
   * Reload the REPL on `.cabal` file modifications
