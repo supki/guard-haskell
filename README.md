@@ -6,8 +6,8 @@ guard-haskell
 
 `Guard::Haskell` automatically runs your specs
 
-Install
--------
+Installation
+------------
 
 ```shell
 % cabal install hspec
@@ -31,11 +31,14 @@ some assumptions about your code organization and style:
 When you type `guard` in the terminal, `guard-haskell` fires up a `cabal repl` instance
 to talk to, running (parts of) examples when files are modified.
 
-### Guard::Haskell setup
+Setup
+-----
 
-For `guard-haskell` to be ready to work we need a test suite named "spec" (that's
-configurable, any test suite name will do) defined in the cabal file and a Guardfile
-(which you can get by running `guard init haskell`)
+For `guard-haskell` to be ready to work we need a test suite (conventionally named "spec")
+defined in the cabal file and a Guardfile (you can get one by running `guard init haskell`)
+
+Marcin Gryszko has put together [a sample project][3] where `guard-haskell` is set up and can
+be tinkered with.
 
 ### Guardfile examples
 
@@ -135,3 +138,4 @@ Fragile concurrent access is a known limitation of the `GHC API`, which hopefull
   [0]: https://github.com/guard/guard#readme
   [1]: http://hspec.github.io/
   [2]: http://hspec.github.io/hspec-discover.html
+  [3]: https://github.com/mgryszko/hspec-kickstart
