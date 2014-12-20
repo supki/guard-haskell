@@ -52,12 +52,12 @@ guard :haskell do
 end
 ```
 
-A customized haskell project:
+Another haskell project with a non-standard layout running `cabal repl`:
 
 ```ruby
-options = ["--ghc-options=-ignore-dot-ghci -DTEST"]
+cmd = "cabal repl spec --ghc-options='-ignore-dot-ghci -DTEST'"
 
-guard :haskell, all_on_start: true, repl_options: options do
+guard :haskell, all_on_start: true, cmd: cmd do
   watch(%r{test/.+Spec\.l?hs$})
   watch(%r{lib/.+\.l?hs$})
   watch(%r{bin/.+\.l?hs$})
@@ -65,14 +65,14 @@ guard :haskell, all_on_start: true, repl_options: options do
 end
 ```
 
-Another customized haskell project:
+Yet another haskell project running `ghci` as a REPL:
 
 ```ruby
-guard :haskell, all_on_start: true, all_on_pass: true, cabal_target: "not-spec" do
+cmd = "cabal exec ghci test/Spec.hs"
+
+guard :haskell, all_on_start: true, all_on_pass: true, cmd: cmd do
   watch(%r{test/.+Spec\.l?hs$})
-  watch(%r{lib/.+\.l?hs$})
-  watch(%r{bin/.+\.l?hs$})
-  watch(%r{\.cabal$})
+  watch(%r{src/.+\.l?hs$})
 end
 ```
 
@@ -84,7 +84,7 @@ It's also advised to have a trivial `Gemfile` in the repository for
 ```ruby
 source "https://rubygems.org"
 
-gem "guard-haskell", "~>2.0"
+gem "guard-haskell", "~>2.1"
 ```
 
 Options
@@ -104,13 +104,9 @@ Run all examples when a failed spec passes again (default: `false`).
 
 Rerun only failed examples until they pass (default: `true`).
 
-### `repl_options`
+### `cmd`
 
-Pass custom cabal repl options (default: `[]`).
-
-### `cabal_target`
-
-The cabal build target to load (default: `spec`).
+The command to run in the background as a REPL (default: `cabal repl spec`)
 
 Known problems
 --------------

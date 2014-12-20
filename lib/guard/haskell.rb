@@ -17,16 +17,14 @@ module ::Guard
     attr_reader :targets, :last_run
 
     Options = ::Struct.new(
-      :cabal_target,
-      :repl_options,
+      :cmd,
       :all_on_start,
       :all_on_pass,
       :focus_on_fail,
     )
 
     DEFAULT_OPTIONS = {
-      cabal_target:  "spec",
-      repl_options:  [],
+      cmd:           "cabal repl spec",
       all_on_start:  false,
       all_on_pass:   false,
       focus_on_fail: true,
@@ -39,8 +37,8 @@ module ::Guard
 
     def start
       @last_run = :success # try to prove it wasn't :-)
-      self.repl = Repl.new(opts.cabal_target, opts.repl_options)
-      throw :cabal_repl_initialization_has_failed if self.repl.status == :loading_failure
+      self.repl = Repl.new(opts.cmd)
+      throw :repl_initialization_has_failed if self.repl.status == :loading_failure
       success?
 
       @targets = ::Set.new(::Dir.glob("**/*.{hs,lhs}"))

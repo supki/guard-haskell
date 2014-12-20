@@ -49,8 +49,9 @@ describe ::Guard::Haskell do
   end
 
   describe "#start" do
-    it "starts repl" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:initialize).with("spec", [])
+    it "starts cabal repl by default" do
+      expect_any_instance_of(::Guard::Haskell::Repl)
+        .to receive(:initialize).with("cabal repl spec")
 
       guard.start
     end
@@ -76,18 +77,13 @@ describe ::Guard::Haskell do
       custom_guard.start
     end
 
-    it "starts repl with custom target specified with :cabal_target option" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:initialize).with("not-spec", [])
+    it "starts the REPL specified by the :cmd option" do
+      cmd = "cabal exec -- ghci test/Spec.hs -ignore-dot-ghci"
 
-      custom_guard = ::Guard::Haskell.new(cabal_target: "not-spec")
-      custom_guard.start
-    end
+      expect_any_instance_of(::Guard::Haskell::Repl)
+        .to receive(:initialize).with(cmd)
 
-    it "starts repl with custom options specified with :repl_options option" do
-      expect_any_instance_of(::Guard::Haskell::Repl).to receive(:initialize)
-        .with("spec", ["--ghc-options=-Werror"])
-
-      custom_guard = ::Guard::Haskell.new(repl_options: ["--ghc-options=-Werror"])
+      custom_guard = ::Guard::Haskell.new(cmd: cmd)
       custom_guard.start
     end
   end
