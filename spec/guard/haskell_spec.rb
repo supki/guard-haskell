@@ -176,19 +176,19 @@ describe ::Guard::Haskell do
 
     it "notifies on success after success" do
       notify(:success, :success, :success) do
-        expect(::Guard::Notifier).to receive(:notify).with('Success')
+        expect(::Guard::Notifier).to receive(:notify).with('Success', image: :success)
       end
     end
 
     it "notifies on success after runtime failure" do
       notify(:runtime_failure, :success, :success) do
-        expect(::Guard::Notifier).to receive(:notify).with('Success')
+        expect(::Guard::Notifier).to receive(:notify).with('Success', image: :success)
       end
     end
 
     it "notifies on success after compile time failure" do
       notify(:compile_failure, :success, :success) do
-        expect(::Guard::Notifier).to receive(:notify).with('Success')
+        expect(::Guard::Notifier).to receive(:notify).with('Success', image: :success)
       end
     end
 
