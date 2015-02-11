@@ -76,12 +76,12 @@ module ::Guard
       when [:runtime_failure, :success],
           [:compile_failure, :success]
         @last_run = :success
-        Notifier.notify('Success')
+        Notifier.notify('Success', image: :success)
         if opts.all_on_pass
           run_all
         end
       when [:success, :success]
-        Notifier.notify('Success')
+        Notifier.notify('Success', image: :success)
       when [:runtime_failure, :compile_failure],
         [:runtime_failure, :runtime_failure],
         [:compile_failure, :compile_failure]
