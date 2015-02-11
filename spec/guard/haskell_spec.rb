@@ -32,8 +32,12 @@ class ::Guard::Haskell::Repl
   end
 end
 
+::Guard.init({})
+
 describe ::Guard::Haskell do
-  let(:guard) { ::Guard::Haskell.new }
+  let(:guard) {
+    ::Guard::Haskell.new
+  }
 
   before :each do
     ::Guard.stub(:add_group)

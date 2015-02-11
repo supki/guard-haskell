@@ -1,11 +1,15 @@
 language: ruby
 
 rvm:
-    - 1.9.3
-    - 2.0.0
-    - 2.1.1
-    - ruby-head
+  - 1.9.3
+  - 2.0.0
+  - 2.1.1
+  - ruby-head
+
+script:
+  - bundle exec rspec
+  - gem build guard-haskell.gemspec
 
 matrix:
-    allow_failures:
-        - rvm: ruby-head
+  allow_failures:
+    - rvm: ruby-head

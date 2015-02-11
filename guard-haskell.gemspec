@@ -11,16 +11,15 @@ Gem::Specification.new do |s|
   s.summary = 'Guard gem for Haskell'
   s.description = 'Guard::Haskell automatically runs your specs'
   s.homepage = 'https://github.com/supki/guard-haskell#readme'
-  s.license = 'BSD3'
+  s.license = 'BSD2'
 
   s.files = `git ls-files`.split($/)
   s.test_files = s.files.grep(%r{^spec/})
   s.require_path = 'lib'
 
-  s.add_dependency 'guard', '>= 2.1.1'
+  s.add_dependency 'guard', '~> 2.12'
+
   s.add_development_dependency 'bundler', '>= 1.3.5'
-  s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
-  s.add_development_dependency 'guard-rspec'
-  s.add_development_dependency 'fakefs'
+  s.add_development_dependency 'fakefs', '~> 0.6'
 end
